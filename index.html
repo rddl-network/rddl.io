@@ -332,21 +332,45 @@
         overline: "Value Map",
         content: (
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left border-separate border-spacing-0">
               <thead className="text-slate-300/90">
                 <tr>
-                  <th className="py-2 pr-4">Stakeholder</th>
-                  <th className="py-2 pr-4">Current Problem</th>
-                  <th className="py-2">With Proof-of-Power</th>
+                  <th className="py-3 px-4 border-b border-slate-700 bg-slate-900/60">Stakeholder</th>
+                  <th className="py-3 px-4 border-b border-slate-700 bg-slate-900/60">Current Problem</th>
+                  <th className="py-3 px-4 border-b border-slate-700 bg-slate-900/60">With Proof-of-Power</th>
                 </tr>
               </thead>
               <tbody className="text-slate-100/95">
-                <tr><td className="pr-4 font-semibold">Communities</td><td className="pr-4">No reward for flexibility</td><td>Earn via DR/VPP/PPA, privacy intact</td></tr>
-                <tr><td className="pr-4 font-semibold">Aggregators</td><td className="pr-4">Slow telemetry & control</td><td>5s cadence + predictive scoring</td></tr>
-                <tr><td className="pr-4 font-semibold">DSOs</td><td className="pr-4">Blind behind meters</td><td>Dynamic P/Q/cosφ control, congestion relief</td></tr>
-                <tr><td className="pr-4 font-semibold">Blockchain nets</td><td className="pr-4">Weak oracles</td><td>Verifiable, pseudonymous data feeds</td></tr>
-                <tr><td className="pr-4 font-semibold">Impact Investors</td><td className="pr-4">Greenwashing risk</td><td>On-chain measurable KPIs</td></tr>
-                <tr><td className="pr-4 font-semibold">Token Holders ($RETU/$REIN)</td><td className="pr-4">No exposure to energy transition data & infra</td><td>Coordination token ($RETU), infra yields ($REIN)</td></tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Communities</td>
+                  <td className="px-4 py-3 border-r border-slate-800">No reward for flexibility</td>
+                  <td className="px-4 py-3">Earn via DR/VPP/PPA, privacy intact</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Aggregators</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Slow telemetry & control</td>
+                  <td className="px-4 py-3">5s cadence + predictive scoring</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">DSOs</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Blind behind meters</td>
+                  <td className="px-4 py-3">Dynamic P/Q/cosφ control, congestion relief</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Blockchain nets</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Weak oracles</td>
+                  <td className="px-4 py-3">Verifiable, pseudonymous data feeds</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Impact Investors</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Greenwashing risk</td>
+                  <td className="px-4 py-3">On-chain measurable KPIs</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Token Holders ($RETU/$REIN)</td>
+                  <td className="px-4 py-3 border-r border-slate-800">No exposure to energy transition data & infra</td>
+                  <td className="px-4 py-3">Coordination token ($RETU), infra yields ($REIN)</td>
+                </tr>
               </tbody>
             </table>
           </div>
