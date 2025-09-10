@@ -310,12 +310,35 @@
         refs: [],
       },
       {
-        title: "The Hidden Costs – Intransparent & Complex",
+        title: "The Opportunity – Market Tailwinds",
+        overline: "Market",
+        content: (
+          <ul className="list-disc">
+            <li><strong>Advanced metering infrastructure</strong> in Europe: USD 5.7 bn (2024) → USD 12 bn (2032). (CAGR ~9.7%)</li>
+            <li>
+              <strong>Battery storage capacity in EU</strong>: 20 GWh today → <strong>120 GWh by 2029</strong>. (
+              <Link href="https://www.solarpowereurope.org/insights/outlooks/european-market-outlook-for-battery-storage-2025-2029/detail">SolarPower Europe, 2025</Link>
+              )
+            </li>
+            <li>
+              <strong>Flexibility markets in EU</strong>: forecast <strong>€40 bn/year by 2030</strong>. (
+              <Link href="https://cerre.eu/wp-content/uploads/2025/05/CERRE-Report_Flexibility_Final.pdf">CERRE, 2025</Link>
+              )
+            </li>
+          </ul>
+        ),
+        refs: [
+          { label: "SolarPower Europe – Battery Storage Outlook 2025–2029", href: "https://www.solarpowereurope.org/insights/outlooks/european-market-outlook-for-battery-storage-2025-2029/detail" },
+          { label: "CERRE (2025) – Flexibility report", href: "https://cerre.eu/wp-content/uploads/2025/05/CERRE-Report_Flexibility_Final.pdf" },
+        ],
+      },
+      {
+        title: "Connection to the Energy Market - Intransparent & Complex",
         overline: "Financing",
         content: (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-2xl font-semibold text-red-400 mb-6">💸 Construction & Grid Costs</h3>
+              <h3 className="text-2xl font-semibold text-red-400 mb-6">💸 Construction & Grid Costs (case dependent)</h3>
               <div className="space-y-3">
                 <div className="glass rounded-lg p-4 ring-soft">
                   <div className="flex justify-between items-center">
@@ -335,10 +358,23 @@
                     <span className="font-bold text-yellow-400">€150,000</span>
                   </div>
                 </div>
+
+                {/* Add extra space before Battery System section */}
+                <div className="mt-6"></div>
+              </div>
+              <h3 className="text-2xl font-semibold text-red-400 mb-6">💸 Battery System</h3>
+              <div className="space-y-3">
+                <div className="glass rounded-lg p-4 ring-soft">
+                  <div className="flex justify-between items-center">
+                    <span>Battery Containers & Inverters</span>
+                    <span className="font-bold text-yellow-400">€800,000</span>
+                  </div>
+                </div>
+                
                 <div className="card-warning rounded-lg p-4">
                   <div className="flex justify-between items-center">
                     <span className="font-bold">Total</span>
-                    <span className="font-bold text-red-400 text-xl">€700,000</span>
+                    <span className="font-bold text-red-400 text-xl">€1,500,000</span>
                   </div>
                 </div>
               </div>
@@ -402,7 +438,7 @@
                   <div className="space-y-4">
                     <div className="pb-3 border-b border-slate-600">
                       <p className="text-sm text-slate-400">Traditional BTC Investments:</p>
-                      <p className="text-2xl"><span className="text-red-400 font-bold">Yield driven by market volatility</span></p>
+                      <p className="text-2xl"><span className="text-red-400 font-bold">Yield driven by market volatility and stability</span></p>
                     </div>
                     <div className="pb-3 border-b border-slate-600">
                       <p className="text-sm text-slate-400">Here:</p>
@@ -579,14 +615,16 @@
                       <span>Incidental costs:</span>
                       <span className="font-semibold">€700,000</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>BTC collateral (30%):</span>
-                      <span className="font-semibold">€500,000</span>
-                    </div>
                     <div className="pt-2 mt-2 border-t border-slate-600">
                       <div className="flex justify-between">
                         <span className="font-bold">Total investment:</span>
-                        <span className="font-bold text-yellow-400">€2,000,000</span>
+                        <span className="font-bold text-yellow-400">€1,500,000</span>
+                      </div>
+                    </div>
+                    <div className="pt-2 mt-2 border-t border-slate-600">
+                      <div className="flex justify-between">
+                        <span>BTC collateral (1.5 x 30%):</span>
+                        <span className="font-semibold">€750,000</span>
                       </div>
                     </div>
                   </div>
@@ -613,20 +651,6 @@
                         <span className="font-bold text-green-400">€230,000</span>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-                            
-              <div className="mt-8 pt-6 border-t border-slate-600">
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div className="glass rounded-lg p-4 ring-soft">
-                    <p className="text-sm text-slate-400">Break-even</p>
-                    <p className="text-2xl font-bold text-yellow-400 mt-1">5.6 years</p>
-                  </div>
-
-                  <div className="glass rounded-lg p-4 ring-soft">
-                    <p className="text-sm text-slate-400">IRR</p>
-                    <p className="text-2xl font-bold text-blue-400 mt-1">14%</p>
                   </div>
                 </div>
               </div>
@@ -665,7 +689,7 @@
                 <div>
                   <div className="text-4xl mb-3">📈</div>
                   <p className="font-semibold">Return</p>
-                  <p className="text-sm text-slate-400">4-20% IRR</p>
+                  <p className="text-sm text-slate-400">10-20% IRR</p>
                 </div>
               </div>
             </div>
@@ -675,7 +699,7 @@
               <div className="space-y-3 text-left max-w-2xl mx-auto text-lg">
                 <div className="flex items-center gap-3">
                   <span className="text-green-400 text-2xl">✓</span>
-                  <span>Visit pilot project</span>
+                  <span>Participate in crowd-investment</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-green-400 text-2xl">✓</span>
@@ -690,7 +714,7 @@
             
             <div className="mt-12">
               <p className="text-3xl font-bold text-yellow-400 mb-4">Let's bridge Bitcoin and Energy!</p>
-              <p className="text-xl">team@rddl.io</p>
+              <p className="text-xl">juergen@rddl.io</p>
               <p className="text-lg text-slate-400 mt-4">Vienna Blockchain Week 2025</p>
             </div>
           </div>
@@ -775,4 +799,4 @@
     root.render(<Deck />);
   </script>
 </body>
-</html>
+</html> 

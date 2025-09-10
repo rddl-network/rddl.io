@@ -546,7 +546,7 @@
         content: (
           <ul className="list-disc">
             <li><strong>What’s connected:</strong> Home gateway reads <strong>smart meter</strong> + devices (heat pump, boiler, home battery, EV charger).</li>
-            <li><strong>Data up / commands down:</strong> Uplink <strong>every 1–5 min</strong> (power, energy, SoC, constraints) · Downlink <strong>15-min schedules</strong> with <code>effective_from</code>, caps, one-shots.</li>
+            <li><strong>Data up / down commands:</strong> Uplink <strong>every 1–5 min</strong> (power, energy, SoC, constraints) · Downlink <strong>15-min schedules</strong> with <code>effective_from</code>, caps, one-shots.</li>
             <li><strong>Comms & device protocols:</strong> LPWAN (<strong>mioty</strong>) via Network Server to Aggregator; devices via <strong>EEBUS / Modbus / HTTP / MQTT</strong>; EV via <strong>OCPP</strong> or local API.</li>
             <li><strong>Reliability & privacy:</strong> If the link drops, homes run the <strong>last valid schedule</strong>; site sees <strong>aggregates only</strong>.</li>
             <li><strong>Outcome:</strong> Many small assets behave like a predictable <strong>flexibility portfolio</strong>.</li>
@@ -619,19 +619,40 @@
         overline: "Appendix",
         content: (
           <p>
-            <span className="block"><strong>DSO/VNB</strong> Distribution System Operator / Verteilnetzbetreiber · <strong>PCC</strong> Point of Common Coupling · <strong>MGO</strong> Microgrid Operator</span>
-            <span className="block"><strong>EMS</strong> Energy Management System · <strong>DERMS</strong> Distributed Energy Resource Management System (Aggregator)</span>
-            <span className="block"><strong>PFC200 / PFC300</strong> WAGO controllers (EMS / protocol brain) · <strong>mioty / MNS</strong> LPWAN tech / mioty Network Server</span>
-            <span className="block"><strong>KPI</strong> Key Performance Indicator · <strong>SoC</strong> State of Charge · <strong>DHW</strong> Domestic Hot Water</span>
-            <span className="block"><strong>EV / EVSE</strong> Electric Vehicle / EV charger · <strong>OCPP</strong> Open Charge Point Protocol · <strong>EEBUS</strong> Energy device interoperability</span>
-            <span className="block"><strong>DLMS/COSEM</strong> Smart-metering standard · <strong>D0</strong> Optical meter interface · <strong>OBIS</strong> Meter datapoint IDs · <strong>HLS5</strong> High-Level Security mode 5</span>
-            <span className="block"><strong>AES-CTR / GMAC</strong> Encryption / auth tag · <strong>MQTT / REST</strong> Pub-sub / HTTP API</span>
-            <span className="block"><strong>IEC-104</strong> Telecontrol (DSO ↔ site) · <strong>OPC UA</strong> Industrial interoperability · <strong>IEC 61850</strong> Substation/DER comms</span>
-            <span className="block"><strong>PTP / NTP / RTC</strong> Time protocols/clocks · <strong>VPN / TLS</strong> Secure tunnel / transport security · <strong>RBAC</strong> Role-based access control</span>
-            <span className="block"><strong>M&V</strong> Measurement & Verification · <strong>CSMS</strong> Charging Station Management System · <strong>evcc</strong> PV-optimized EV charging controller</span>
-            <span className="block"><strong>HA</strong> Home Assistant · <strong>RUTX50</strong> Teltonika industrial router · <strong>IGMP / VLAN / QoS</strong> Network multicast / segmentation / prioritization</span>
+            <span className="block"><strong>AES-CTR / GMAC</strong> Encryption / auth tag</span>
+            <span className="block"><strong>CSMS</strong> Charging Station Management System</span>
+            <span className="block"><strong>D0</strong> Optical meter interface</span>
+            <span className="block"><strong>DERMS</strong> Distributed Energy Resource Management System (Aggregator)</span>
+            <span className="block"><strong>DHW</strong> Domestic Hot Water</span>
+            <span className="block"><strong>DLMS/COSEM</strong> Smart-metering standard</span>
+            <span className="block"><strong>DSO/VNB</strong> Distribution System Operator / Verteilnetzbetreiber</span>
             <span className="block"><strong>EDA / AS4 / ebMS3</strong> Austria market messaging / secure B2B transport / messaging standard (market comms, not real-time control)</span>
+            <span className="block"><strong>EEBUS</strong> Energy device interoperability</span>
+            <span className="block"><strong>EMS</strong> Energy Management System</span>
+            <span className="block"><strong>EV / EVSE</strong> Electric Vehicle / EV charger</span>
+            <span className="block"><strong>evcc</strong> PV-optimized EV charging controller</span>
+            <span className="block"><strong>HA</strong> Home Assistant</span>
+            <span className="block"><strong>HLS5</strong> High-Level Security mode 5</span>
+            <span className="block"><strong>IEC-104</strong> Telecontrol (DSO ↔ site)</span>
+            <span className="block"><strong>IEC 61850</strong> Substation/DER comms</span>
+            <span className="block"><strong>IGMP / VLAN / QoS</strong> Network multicast / segmentation / prioritization</span>
+            <span className="block"><strong>KPI</strong> Key Performance Indicator</span>
+            <span className="block"><strong>M&V</strong> Measurement & Verification</span>
+            <span className="block"><strong>MGO</strong> Microgrid Operator</span>
+            <span className="block"><strong>mioty / MNS</strong> LPWAN tech / mioty Network Server</span>
+            <span className="block"><strong>MQTT / REST</strong> Pub-sub / HTTP API</span>
+            <span className="block"><strong>NPT / NTP / RTC</strong> Time protocols/clocks</span>
+            <span className="block"><strong>NZE</strong> Net Zero Emission</span>
+            <span className="block"><strong>OBIS</strong> Meter datapoint IDs</span>
+            <span className="block"><strong>OCPP</strong> Open Charge Point Protocol</span>
+            <span className="block"><strong>OPC UA</strong> Industrial interoperability</span>
+            <span className="block"><strong>PCC</strong> Point of Common Coupling</span>
+            <span className="block"><strong>PFC200 / PFC300</strong> WAGO controllers (EMS / protocol brain)</span>
+            <span className="block"><strong>PTP / NTP / RTC</strong> Time protocols/clocks</span>
+            <span className="block"><strong>RBAC</strong> Role-based access control</span>
+            <span className="block"><strong>RUTX50</strong> Teltonika industrial router</span>
             <span className="block"><strong>SMA</strong> Smart-Meter Access (home smart-meter connectivity)</span>
+            <span className="block"><strong>SoC</strong> State of Charge</span>
           </p>
         ),
         refs: [],
