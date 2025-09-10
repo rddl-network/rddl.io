@@ -332,21 +332,45 @@
         overline: "Value Map",
         content: (
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left border-separate border-spacing-0">
               <thead className="text-slate-300/90">
                 <tr>
-                  <th className="py-2 pr-4">Stakeholder</th>
-                  <th className="py-2 pr-4">Current Problem</th>
-                  <th className="py-2">With Proof-of-Power</th>
+                  <th className="py-3 px-4 border-b border-slate-700 bg-slate-900/60">Stakeholder</th>
+                  <th className="py-3 px-4 border-b border-slate-700 bg-slate-900/60">Current Problem</th>
+                  <th className="py-3 px-4 border-b border-slate-700 bg-slate-900/60">With Proof-of-Power</th>
                 </tr>
               </thead>
               <tbody className="text-slate-100/95">
-                <tr><td className="pr-4 font-semibold">Communities</td><td className="pr-4">No reward for flexibility</td><td>Earn via DR/VPP/PPA, privacy intact</td></tr>
-                <tr><td className="pr-4 font-semibold">Aggregators</td><td className="pr-4">Slow telemetry & control</td><td>5s cadence + predictive scoring</td></tr>
-                <tr><td className="pr-4 font-semibold">DSOs</td><td className="pr-4">Blind behind meters</td><td>Dynamic P/Q/cosφ control, congestion relief</td></tr>
-                <tr><td className="pr-4 font-semibold">Blockchain nets</td><td className="pr-4">Weak oracles</td><td>Verifiable, pseudonymous data feeds</td></tr>
-                <tr><td className="pr-4 font-semibold">Impact Investors</td><td className="pr-4">Greenwashing risk</td><td>On-chain measurable KPIs</td></tr>
-                <tr><td className="pr-4 font-semibold">Token Holders ($RETU/$REIN)</td><td className="pr-4">No exposure to energy transition data & infra</td><td>Coordination token ($RETU), infra yields ($REIN)</td></tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Communities</td>
+                  <td className="px-4 py-3 border-r border-slate-800">No reward for flexibility</td>
+                  <td className="px-4 py-3">Earn via DR/VPP/PPA, privacy intact</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Aggregators</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Slow telemetry & control</td>
+                  <td className="px-4 py-3">5s cadence + predictive scoring</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">DSOs</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Blind behind meters</td>
+                  <td className="px-4 py-3">Dynamic P/Q/cosφ control, congestion relief</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Blockchain nets</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Weak oracles</td>
+                  <td className="px-4 py-3">Verifiable, pseudonymous data feeds</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Impact Investors</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Greenwashing risk</td>
+                  <td className="px-4 py-3">On-chain measurable KPIs</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Token Holders ($RETU/$REIN)</td>
+                  <td className="px-4 py-3 border-r border-slate-800">No exposure to energy transition data & infra</td>
+                  <td className="px-4 py-3">Coordination token ($RETU), infra yields ($REIN)</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -522,7 +546,7 @@
         content: (
           <ul className="list-disc">
             <li><strong>What’s connected:</strong> Home gateway reads <strong>smart meter</strong> + devices (heat pump, boiler, home battery, EV charger).</li>
-            <li><strong>Data up / commands down:</strong> Uplink <strong>every 1–5 min</strong> (power, energy, SoC, constraints) · Downlink <strong>15-min schedules</strong> with <code>effective_from</code>, caps, one-shots.</li>
+            <li><strong>Data up / down commands:</strong> Uplink <strong>every 1–5 min</strong> (power, energy, SoC, constraints) · Downlink <strong>15-min schedules</strong> with <code>effective_from</code>, caps, one-shots.</li>
             <li><strong>Comms & device protocols:</strong> LPWAN (<strong>mioty</strong>) via Network Server to Aggregator; devices via <strong>EEBUS / Modbus / HTTP / MQTT</strong>; EV via <strong>OCPP</strong> or local API.</li>
             <li><strong>Reliability & privacy:</strong> If the link drops, homes run the <strong>last valid schedule</strong>; site sees <strong>aggregates only</strong>.</li>
             <li><strong>Outcome:</strong> Many small assets behave like a predictable <strong>flexibility portfolio</strong>.</li>
@@ -595,19 +619,40 @@
         overline: "Appendix",
         content: (
           <p>
-            <span className="block"><strong>DSO/VNB</strong> Distribution System Operator / Verteilnetzbetreiber · <strong>PCC</strong> Point of Common Coupling · <strong>MGO</strong> Microgrid Operator</span>
-            <span className="block"><strong>EMS</strong> Energy Management System · <strong>DERMS</strong> Distributed Energy Resource Management System (Aggregator)</span>
-            <span className="block"><strong>PFC200 / PFC300</strong> WAGO controllers (EMS / protocol brain) · <strong>mioty / MNS</strong> LPWAN tech / mioty Network Server</span>
-            <span className="block"><strong>KPI</strong> Key Performance Indicator · <strong>SoC</strong> State of Charge · <strong>DHW</strong> Domestic Hot Water</span>
-            <span className="block"><strong>EV / EVSE</strong> Electric Vehicle / EV charger · <strong>OCPP</strong> Open Charge Point Protocol · <strong>EEBUS</strong> Energy device interoperability</span>
-            <span className="block"><strong>DLMS/COSEM</strong> Smart-metering standard · <strong>D0</strong> Optical meter interface · <strong>OBIS</strong> Meter datapoint IDs · <strong>HLS5</strong> High-Level Security mode 5</span>
-            <span className="block"><strong>AES-CTR / GMAC</strong> Encryption / auth tag · <strong>MQTT / REST</strong> Pub-sub / HTTP API</span>
-            <span className="block"><strong>IEC-104</strong> Telecontrol (DSO ↔ site) · <strong>OPC UA</strong> Industrial interoperability · <strong>IEC 61850</strong> Substation/DER comms</span>
-            <span className="block"><strong>PTP / NTP / RTC</strong> Time protocols/clocks · <strong>VPN / TLS</strong> Secure tunnel / transport security · <strong>RBAC</strong> Role-based access control</span>
-            <span className="block"><strong>M&V</strong> Measurement & Verification · <strong>CSMS</strong> Charging Station Management System · <strong>evcc</strong> PV-optimized EV charging controller</span>
-            <span className="block"><strong>HA</strong> Home Assistant · <strong>RUTX50</strong> Teltonika industrial router · <strong>IGMP / VLAN / QoS</strong> Network multicast / segmentation / prioritization</span>
+            <span className="block"><strong>AES-CTR / GMAC</strong> Encryption / auth tag</span>
+            <span className="block"><strong>CSMS</strong> Charging Station Management System</span>
+            <span className="block"><strong>D0</strong> Optical meter interface</span>
+            <span className="block"><strong>DERMS</strong> Distributed Energy Resource Management System (Aggregator)</span>
+            <span className="block"><strong>DHW</strong> Domestic Hot Water</span>
+            <span className="block"><strong>DLMS/COSEM</strong> Smart-metering standard</span>
+            <span className="block"><strong>DSO/VNB</strong> Distribution System Operator / Verteilnetzbetreiber</span>
             <span className="block"><strong>EDA / AS4 / ebMS3</strong> Austria market messaging / secure B2B transport / messaging standard (market comms, not real-time control)</span>
+            <span className="block"><strong>EEBUS</strong> Energy device interoperability</span>
+            <span className="block"><strong>EMS</strong> Energy Management System</span>
+            <span className="block"><strong>EV / EVSE</strong> Electric Vehicle / EV charger</span>
+            <span className="block"><strong>evcc</strong> PV-optimized EV charging controller</span>
+            <span className="block"><strong>HA</strong> Home Assistant</span>
+            <span className="block"><strong>HLS5</strong> High-Level Security mode 5</span>
+            <span className="block"><strong>IEC-104</strong> Telecontrol (DSO ↔ site)</span>
+            <span className="block"><strong>IEC 61850</strong> Substation/DER comms</span>
+            <span className="block"><strong>IGMP / VLAN / QoS</strong> Network multicast / segmentation / prioritization</span>
+            <span className="block"><strong>KPI</strong> Key Performance Indicator</span>
+            <span className="block"><strong>M&V</strong> Measurement & Verification</span>
+            <span className="block"><strong>MGO</strong> Microgrid Operator</span>
+            <span className="block"><strong>mioty / MNS</strong> LPWAN tech / mioty Network Server</span>
+            <span className="block"><strong>MQTT / REST</strong> Pub-sub / HTTP API</span>
+            <span className="block"><strong>NPT / NTP / RTC</strong> Time protocols/clocks</span>
+            <span className="block"><strong>NZE</strong> Net Zero Emission</span>
+            <span className="block"><strong>OBIS</strong> Meter datapoint IDs</span>
+            <span className="block"><strong>OCPP</strong> Open Charge Point Protocol</span>
+            <span className="block"><strong>OPC UA</strong> Industrial interoperability</span>
+            <span className="block"><strong>PCC</strong> Point of Common Coupling</span>
+            <span className="block"><strong>PFC200 / PFC300</strong> WAGO controllers (EMS / protocol brain)</span>
+            <span className="block"><strong>PTP / NTP / RTC</strong> Time protocols/clocks</span>
+            <span className="block"><strong>RBAC</strong> Role-based access control</span>
+            <span className="block"><strong>RUTX50</strong> Teltonika industrial router</span>
             <span className="block"><strong>SMA</strong> Smart-Meter Access (home smart-meter connectivity)</span>
+            <span className="block"><strong>SoC</strong> State of Charge</span>
           </p>
         ),
         refs: [],
