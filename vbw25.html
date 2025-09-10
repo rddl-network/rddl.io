@@ -294,12 +294,12 @@
                   <p className="text-sm text-slate-500 mt-1">Does not help the market</p>
                 </div>
                 <div className="card-success rounded-lg p-6">
-                  <p className="text-2xl font-bold text-green-400">1-5 MW systems</p>
+                  <p className="text-2xl font-bold text-green-400">1-5 MWh systems</p>
                   <p className="text-sm text-green-400 mt-2">= This is where it gets economically interesting!</p>
                   <p className="text-sm text-slate-300 mt-1">The real sweet spot</p>
                 </div>
                 <div className="glass rounded-lg p-6 ring-soft opacity-50">
-                  <p className="text-xl line-through text-slate-400">>10 MW systems</p>
+                  <p className="text-xl line-through text-slate-400">>10 MWh systems</p>
                   <p className="text-sm text-red-400 mt-2">= Grid too weak/unflexible at this point in time</p>
                   <p className="text-sm text-slate-300 mt-1">Will be built later</p>
                 </div>
@@ -310,34 +310,25 @@
         refs: [],
       },
       {
-        title: "The Opportunity – Market Tailwinds",
-        overline: "Market",
-        content: (
-          <ul className="list-disc">
-            <li><strong>Advanced metering infrastructure</strong> in Europe: USD 5.7 bn (2024) → USD 12 bn (2032). (CAGR ~9.7%)</li>
-            <li>
-              <strong>Battery storage capacity in EU</strong>: 20 GWh today → <strong>120 GWh by 2029</strong>. (
-              <Link href="https://www.solarpowereurope.org/insights/outlooks/european-market-outlook-for-battery-storage-2025-2029/detail">SolarPower Europe, 2025</Link>
-              )
-            </li>
-            <li>
-              <strong>Flexibility markets in EU</strong>: forecast <strong>€40 bn/year by 2030</strong>. (
-              <Link href="https://cerre.eu/wp-content/uploads/2025/05/CERRE-Report_Flexibility_Final.pdf">CERRE, 2025</Link>
-              )
-            </li>
-          </ul>
-        ),
-        refs: [
-          { label: "SolarPower Europe – Battery Storage Outlook 2025–2029", href: "https://www.solarpowereurope.org/insights/outlooks/european-market-outlook-for-battery-storage-2025-2029/detail" },
-          { label: "CERRE (2025) – Flexibility report", href: "https://cerre.eu/wp-content/uploads/2025/05/CERRE-Report_Flexibility_Final.pdf" },
-        ],
-      },
-      {
         title: "Connection to the Energy Market - Intransparent & Complex",
         overline: "Financing",
         content: (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
+
+              <h3 className="text-2xl font-semibold text-red-400 mb-6">💸 Battery System</h3>
+              <div className="space-y-3">
+                <div className="glass rounded-lg p-4 ring-soft">
+                  <div className="flex justify-between items-center">
+                    <span>Battery Containers & Inverters</span>
+                    <span className="font-bold text-yellow-400">€800,000</span>
+                  </div>
+                {/* Add extra space before Battery System section */}
+                <div className="mt-6"></div>
+
+                </div>
+
+
               <h3 className="text-2xl font-semibold text-red-400 mb-6">💸 Construction & Grid Costs (case dependent)</h3>
               <div className="space-y-3">
                 <div className="glass rounded-lg p-4 ring-soft">
@@ -358,18 +349,7 @@
                     <span className="font-bold text-yellow-400">€150,000</span>
                   </div>
                 </div>
-
-                {/* Add extra space before Battery System section */}
-                <div className="mt-6"></div>
               </div>
-              <h3 className="text-2xl font-semibold text-red-400 mb-6">💸 Battery System</h3>
-              <div className="space-y-3">
-                <div className="glass rounded-lg p-4 ring-soft">
-                  <div className="flex justify-between items-center">
-                    <span>Battery Containers & Inverters</span>
-                    <span className="font-bold text-yellow-400">€800,000</span>
-                  </div>
-                </div>
                 
                 <div className="card-warning rounded-lg p-4">
                   <div className="flex justify-between items-center">
@@ -384,15 +364,20 @@
               <h3 className="text-2xl font-semibold text-yellow-400 mb-6">🏦 Traditional Financing</h3>
               <div className="space-y-4">
                 <div className="glass rounded-xl p-6 ring-soft">
-                  <p className="text-lg mb-2">Junior (Equity): <span className="font-bold text-yellow-400">30%</span></p>
-                  <p className="text-lg">Senior (Debt): <span className="font-bold text-yellow-400">70%</span></p>
+                  <p className="text-lg mb-2">Junior Loan (Equity): <span className="font-bold text-yellow-400">30%</span></p>
+                  <p className="text-lg">Senior Loan(Debt): <span className="font-bold text-yellow-400">70%</span></p>
                 </div>
                 
                 <div className="card-warning rounded-xl p-6">
                   <h4 className="font-semibold text-red-400 mb-3">⚠️ The Problem:</h4>
                   <ul className="space-y-2 text-sm">
                     <li>• Reducing the risk for banks and investors</li>
-                    <li>• Energy Market is not easily accessible</li>
+                    <li>• Energy Markets are not easily accessible</li>
+                    <ul className="ml-6">
+                      <li>  • Licenses</li>
+                      <li>  • Insights</li>
+                      <li>  • Regulations</li>
+                    </ul>
                     <li className="text-red-400 font-semibold"> → non-trivial scenario</li>
                   </ul>
                 </div>
@@ -422,7 +407,7 @@
                   
                   <div className="glass rounded-xl p-6 ring-soft neon transition-base">
                     <h4 className="font-semibold text-yellow-400 mb-2">2. Multiple Collateralization</h4>
-                    <p className="text-sm">BTC collateral + system productivity (monitoring & visibility)</p>
+                    <p className="text-sm">BTC collateral + Tokenizing System Productivity (Monitoring & Visibility)</p>
                   </div>
                   
                   <div className="glass rounded-xl p-6 ring-soft neon transition-base">
@@ -438,18 +423,18 @@
                   <div className="space-y-4">
                     <div className="pb-3 border-b border-slate-600">
                       <p className="text-sm text-slate-400">Traditional BTC Investments:</p>
-                      <p className="text-2xl"><span className="text-red-400 font-bold">Yield driven by market volatility and stability</span></p>
+                      <p className="text-2xl"><span className="text-red-400 font-bold">Yield defined by crypto markets</span></p>
                     </div>
                     <div className="pb-3 border-b border-slate-600">
                       <p className="text-sm text-slate-400">Here:</p>
-                      <p className="text-2xl"><span className="text-green-400 font-bold">Yield is generated by energy productivity and market participation</span></p>
+                      <p className="text-2xl"><span className="text-green-400 font-bold">Yield is generated by revenue on the energy markets</span></p>
                     </div>
                     <div className="pt-2">
                       <p className="text-xl font-bold text-yellow-400">
                         → Project becomes financeable!
                       </p>
                       <p className="text-sm text-slate-300 mt-2">
-                        System operated by experts runs close to optimal capacity
+                        System operated by AI/ML/experts runs close to optimal capacity
                       </p>
                     </div>
                   </div>
@@ -578,7 +563,7 @@
                 <div>
                   <p className="font-semibold text-yellow-400 mb-2">Pipeline:</p>
                   <p>First pilot project is in preparation, 2nd in queue</p>
-                  <p className="text-sm text-slate-400 mt-1">Working on cost optimizations</p>
+                  <p>Collaboration with Distribution System Operator (DSO)</p>
                 </div>
                 <div>
                   <p className="font-semibold text-yellow-400 mb-2">Next step:</p>
