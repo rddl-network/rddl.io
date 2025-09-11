@@ -211,47 +211,12 @@
       {
         title: "Industrial Energy Price Comparison (2024)",
         overline: "Context",
-        content: (
-          <div className="max-w-4xl mx-auto">
-            <table className="w-full text-left border-separate border-spacing-y-2">
-              <thead>
-                <tr className="bg-slate-800/60">
-                  <th className="px-4 py-2 rounded-tl-xl">Region/Country</th>
-                  <th className="px-4 py-2">Industrial Electricity Price<br/>(EUR/kWh, approx. 2024 avg.)</th>
-                  <th className="px-4 py-2">Industrial Gas Price<br/>(EUR/MWh, approx. 2023-2024)</th>
-                  <th className="px-4 py-2 rounded-tr-xl">Key Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="glass ring-soft">
-                  <td className="px-4 py-2 font-semibold">EU Average</td>
-                  <td className="px-4 py-2">0.199</td>
-                  <td className="px-4 py-2">59 (for large consumers)</td>
-                  <td className="px-4 py-2">Prices 2x US levels; expected to rise 15-30% in 2025 due to wholesale increases.</td>
-                </tr>
-                <tr className="glass ring-soft">
-                  <td className="px-4 py-2 font-semibold">United States</td>
-                  <td className="px-4 py-2">0.075</td>
-                  <td className="px-4 py-2">~12-15 (post-2022)</td>
-                  <td className="px-4 py-2">Prices only 21% higher than pre-2022; shale gas abundance keeps costs low.</td>
-                </tr>
-                <tr className="glass ring-soft">
-                  <td className="px-4 py-2 font-semibold">China</td>
-                  <td className="px-4 py-2">0.082</td>
-                  <td className="px-4 py-2">Stable, ~20-30</td>
-                  <td className="px-4 py-2">Renewables met 84% of 2024 demand growth; low costs support manufacturing dominance (e.g., 90% of global solar panels).</td>
-                </tr>
-                <tr className="glass ring-soft">
-                  <td className="px-4 py-2 font-semibold">Germany (example)</td>
-                  <td className="px-4 py-2">0.20-0.25</td>
-                  <td className="px-4 py-2">60+</td>
-                  <td className="px-4 py-2">Highest in EU; contributes to "sick man of Europe" label amid recession risks.</td>
-                </tr>
-              </tbody>
-            </table>
-            <div className="text-sm text-slate-400 mt-4">Sources: Eurostat, US EIA, China NBS, industry reports (2024)</div>
-          </div>
-        ),
+          content: (
+            <div className="max-w-4xl mx-auto">
+              <canvas id="energyPriceChart" style={{maxWidth: '800px', width: '100%', background: 'white', borderRadius: '12px', margin: '0 auto', display: 'block'}} height="320"></canvas>
+              <div className="text-sm text-slate-400 mt-4">Sources: Eurostat, US EIA, China NBS, industry reports (2024)</div>
+            </div>
+          ),
         refs: [],
       },
       {
@@ -345,7 +310,7 @@
                   <p className="text-sm text-slate-300 mt-1">The real sweet spot</p>
                 </div>
                 <div className="glass rounded-lg p-6 ring-soft opacity-50">
-                  <p className="text-xl line-through text-slate-400">>10 MWh systems</p>
+                  <p className="text-xl line-through text-slate-400">{'>'}10 MWh systems</p>
                   <p className="text-sm text-red-400 mt-2">= Grid too weak/unflexible at this point in time</p>
                   <p className="text-sm text-slate-300 mt-1">Will be built later</p>
                 </div>
@@ -768,18 +733,106 @@
       const next = () => go(i + 1);
       const prev = () => go(i - 1);
 
-      useEffect(() => {
-        const onKey = (e) => {
-          if (e.key === "ArrowRight") next();
-          else if (e.key === "ArrowLeft") prev();
-          else if (e.key.toLowerCase() === "g") setShowIndex(v => !v);
-          else if (e.key.toLowerCase() === "r") setShowRefs(v => !v);
-          else if (e.key === "Home") go(0);
-          else if (e.key === "End") go(count - 1);
-        };
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-      }, [i, count]);
+
+        useEffect(() => {
+          const onKey = (e) => {
+            if (e.key === "ArrowRight") next();
+            else if (e.key === "ArrowLeft") prev();
+            else if (e.key.toLowerCase() === "g") setShowIndex(v => !v);
+            else if (e.key.toLowerCase() === "r") setShowRefs(v => !v);
+            else if (e.key === "Home") go(0);
+            else if (e.key === "End") go(count - 1);
+          };
+          window.addEventListener("keydown", onKey);
+          return () => window.removeEventListener("keydown", onKey);
+        }, [i, count]);
+
+        // Chart.js graph for slide 2
+        useEffect(() => {
+          if (i === 1) {
+            // Dynamically load Chart.js if not present
+            const ensureChartJs = () => {
+              if (window.Chart) return Promise.resolve();
+              return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                script.onload = resolve;
+                script.onerror = reject;
+                document.body.appendChild(script);
+              });
+            };
+            ensureChartJs().then(() => {
+              const ctx = document.getElementById('energyPriceChart')?.getContext('2d');
+              if (!ctx) return;
+              // Destroy previous chart if exists
+              if (window.energyPriceChartInstance) {
+                window.energyPriceChartInstance.destroy();
+              }
+              window.energyPriceChartInstance = new window.Chart(ctx, {
+                type: 'line',
+                data: {
+                  labels: ['2019', '2020', '2021', '2022', '2023', '2024'],
+                  datasets: [
+                    {
+                      label: 'EU27 (USD/MWh)',
+                      data: [120, 110, 140, 250, 200, 219],
+                      borderColor: '#FF6384',
+                      fill: false,
+                      tension: 0.1
+                    },
+                    {
+                      label: 'United States (USD/MWh)',
+                      data: [70, 65, 70, 80, 80, 82.5],
+                      borderColor: '#36A2EB',
+                      fill: false,
+                      tension: 0.1
+                    },
+                    {
+                      label: 'China (USD/MWh)',
+                      data: [80, 75, 80, 85, 85, 90],
+                      borderColor: '#FFCE56',
+                      fill: false,
+                      tension: 0.1
+                    }
+                  ]
+                },
+                options: {
+                  responsive: true,
+                  plugins: {
+                    title: {
+                      display: true,
+                      text: 'Industrial Electricity Prices (2019-2024)',
+                      font: { size: 18 }
+                    },
+                    legend: { position: 'top' }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      title: {
+                        display: true,
+                        text: 'Price (USD/MWh)'
+                      }
+                    },
+                    x: {
+                      title: {
+                        display: true,
+                        text: 'Year'
+                      }
+                    }
+                  }
+                }
+              });
+            });
+          }
+          // Optional: cleanup chart on slide change
+          return () => {
+            if (window.energyPriceChartInstance) {
+              window.energyPriceChartInstance.destroy();
+              window.energyPriceChartInstance = null;
+            }
+          };
+        }, [i]);
 
       const slide = slides[i];
 
