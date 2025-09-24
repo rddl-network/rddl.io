@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Energy • AI • Bitcoin — Neon Deck</title>
+  <meta name="description" content="Reference-rich presentation deck with dark-neon glassmorphism styling." />
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+  <link rel="stylesheet" as="style" onload="this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?display=swap&family=Inter:wght@400;600;800;900&family=Noto+Sans:wght@400;600;800;900" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --bg-1:#0B1020; /* deep night */
+      --bg-2:#0F1B3D; /* indigo navy */
+      --el-blue:#3B82F6;  /* electric blue */
+      --el-cyan:#06B6D4;  /* cyan */
+      --el-violet:#8B5CF6;/* violet */
+      --el-mint:#34D399;  /* mint */
+      --el-yellow:#FACC15;/* warm accent */
+    }
+    body {
+      background:
+        radial-gradient(1200px 800px at 10% -10%, rgba(59,130,246,.14), transparent 60%),
+        radial-gradient(900px 600px at 95% 10%, rgba(6,182,212,.10), transparent 60%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+      font-family: Inter, "Noto Sans", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      color:#e5e7eb;
+      /* Roomier base sizing for the whole deck (scales up on larger screens) */
+      font-size: clamp(15px, 0.9vw + 12px, 18px);
+    }
+    .glass { background: rgba(255,255,255,.06); backdrop-filter: saturate(1.1) blur(10px); }
+    .ring-soft { box-shadow: 0 0 0 1px rgba(148,163,184,.18) inset; }
+    .neon:hover { box-shadow:
+      0 0 0 1px rgba(99,102,241,.5) inset,
+      0 0 24px rgba(59,130,246,.20),
+      0 0 48px rgba(139,92,246,.14); transform: translateY(-2px);
+    }
+    .transition-base { transition: all .25s ease; }
+    .grad-text { background: linear-gradient(90deg, var(--el-blue), var(--el-cyan), var(--el-violet));
+                 -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .btn-primary { background: linear-gradient(135deg, var(--el-blue), var(--el-violet)); color: white; box-shadow: 0 10px 30px rgba(59,130,246,.25); }
+    .btn-primary:hover{ filter: brightness(1.07); box-shadow: 0 14px 36px rgba(59,130,246,.35); }
+    .btn-ghost { border:1px solid rgba(255,255,255,.22); color:#E5E7EB; }
+    .btn-ghost:hover{ border-color: rgba(255,255,255,.35); color:white; }
+    .icon{ width:1.1rem; height:1.1rem; stroke:#fff; fill:none; stroke-width:2; filter: drop-shadow(0 0 8px rgba(255,255,255,.15)); }
+    .underlined::after{ content:""; display:block; width:64px; height:3px; margin-top:.6rem;
+      background: linear-gradient(90deg, var(--el-yellow), var(--el-mint)); border-radius:999px; }
+    .grid-overlay { position: absolute; inset: -10%; pointer-events:none; opacity:.05; mix-blend:screen;
+      background-image: linear-gradient(to right, #fff 1px, transparent 1px),
+                        linear-gradient(to bottom, #fff 1px, transparent 1px);
+      background-size: 30px 30px; animation: pan 18s linear infinite; }
+    @keyframes pan { from{ transform: translateX(0) } to{ transform: translateX(-30px) } }
+
+    /* Roomier, more legible content defaults inside the slide content area */
+    .content {
+      letter-spacing: .005em;
+      word-spacing: .02em;
+      line-height: 1.8;
+    }
+    .content p + p { margin-top: .75rem; }
+    .content ul, .content ol { padding-left: 1.25rem; margin-top: .25rem; }
+    .content ul li, .content ol li { margin: .45rem 0; }
+    .content table { font-size: 1rem; }
+    .content h1 { font-size: clamp(2rem, 2.6vw + 1rem, 3.5rem); line-height: 1.15; letter-spacing:-.01em; }
+    .content h2 { font-size: clamp(1.5rem, 1.6vw + 1rem, 2.25rem); line-height:1.2; }
+
+    /* Respect reduced motion for the subtle background grid */
+    @media (prefers-reduced-motion: reduce) {
+      .grid-overlay { animation: none; }
+      .transition-base, .neon:hover { transition: none; }
+    }
+  </style>
+
+  <!-- React & Babel (for in-browser JSX) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="antialiased selection:bg-indigo-500/30">
+  <div id="app"></div>
+
+  <script type="text/babel">
+    const { useEffect, useState } = React;
+
+    /* ===== Small UI primitives ===== */
+    const Kbd = ({ children }) => (
+      <kbd className="inline-flex items-center justify-center min-w-[1.75rem] px-2 py-1 rounded-md border border-white/30 text-[0.8rem] font-medium leading-none">
+        {children}
+      </kbd>
+    );
+
+    const ProgressBar = ({ value }) => (
+      <div className="h-[6px] w-full bg-white/10 rounded-full overflow-hidden">
+        <div className="h-full rounded-full bg-white/70 transition-all" style={{ width: `${value}%` }} />
+      </div>
+    );
+
+    const Pill = ({ children, className = "" }) => (
+      <span className={`inline-flex items-center gap-2 rounded-full glass ring-soft px-3 py-1 text-sm ${className}`}>{children}</span>
+    );
+
+    const Link = ({ href, children }) => (
+      <a href={href} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:opacity-90">
+        {children}
+      </a>
+    );
+
+    /* ===== RDDL Foundation icon (file reference) ===== */
+    const RDDL_ICON = "./images/rddl-Ldot-glyph-square-flush-512.png"; // adjust path if needed
+
+    const RddlMark = () => (
+      <span className="inline-flex items-center gap-2 select-none">
+        <img
+          src={RDDL_ICON}
+          alt="RDDL Foundation"
+          title="RDDL Foundation"
+          className="h-7 w-7 "
+        />
+        <span className="text-sm tracking-wide opacity-90">RDDL Foundation</span>
+      </span>
+    );
+
+    /* ===== Slide shell ===== */
+    const SlideShell = ({
+      slideNo, slideCount, title, overline, children,
+      showRefs = true, refs = [], onNext, onPrev, onToggleIndex, onToggleRefs,
+    }) => {
+      const stop = (e) => e.stopPropagation();
+      return (
+        <div className="min-h-screen w-full flex flex-col">
+          {/* Header (larger, clearer navigation) */}
+          <header
+            className="flex items-center gap-4 md:gap-6 px-6 md:px-10 py-3 md:py-4 sticky top-0 z-10 backdrop-blur bg-[#0c1329]/80 border-b border-white/10"
+            onClick={stop}
+          >
+            <div className="flex-1 flex items-center gap-3 md:gap-4">
+              <RddlMark />
+              <Pill className="hidden sm:inline-flex">Energy • AI • Bitcoin</Pill>
+              {overline ? <Pill className="bg-black/80 text-white border-black/80">{overline}</Pill> : null}
+            </div>
+            <div className="flex items-center gap-2 md:gap-3 text-base">
+              <button onClick={(e)=>{stop(e);onPrev();}} className="rounded-xl px-4 md:px-5 py-2 md:py-2.5 font-semibold btn-ghost transition-base">‹ Prev</button>
+              <button onClick={(e)=>{stop(e);onNext();}} className="rounded-xl px-4 md:px-5 py-2 md:py-2.5 font-semibold btn-primary transition-base">Next ›</button>
+              <button onClick={(e)=>{stop(e);onToggleIndex();}} className="rounded-xl px-4 md:px-5 py-2 md:py-2.5 font-semibold btn-ghost transition-base">Index</button>
+              <button onClick={(e)=>{stop(e);onToggleRefs();}} className="rounded-xl px-4 md:px-5 py-2 md:py-2.5 font-semibold btn-ghost transition-base">Refs</button>
+              <span className="tabular-nums min-w-[6ch] text-right text-sm md:text-base opacity-80">{slideNo}/{slideCount}</span>
+            </div>
+          </header>
+
+          <div className="px-6 md:px-10 pt-2">
+            <ProgressBar value={(slideNo / slideCount) * 100} />
+          </div>
+
+          {/* Body (roomier grid + limited measure for content) */}
+          <main className="grow grid grid-cols-12 gap-8 md:gap-10 px-6 md:px-10 py-6 md:py-10" onClick={onNext}>
+            {/* Left rail */}
+            <aside className="col-span-12 md:col-span-4 xl:col-span-3">
+              <h2 className="text-3xl md:text-4xl font-bold leading-tight tracking-tight">{title}</h2>
+              <div className="mt-5 space-y-3 text-[0.95rem] opacity-85">
+                <p className="leading-relaxed">Reserved boxes for diagrams (schematics/flows) and images.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl glass ring-soft p-4 text-center text-sm">Diagram slot</div>
+                  <div className="rounded-2xl glass ring-soft p-4 text-center text-sm">Image slot</div>
+                </div>
+              </div>
+            </aside>
+
+            {/* Content */}
+            <section className="col-span-12 md:col-span-8 xl:col-span-9">
+              <div className="content text-slate-100 max-w-[78ch] space-y-4">
+                {children}
+              </div>
+            </section>
+          </main>
+
+          {/* References */}
+          {showRefs && refs && refs.length > 0 ? (
+            <footer className="px-6 md:px-10 pb-6">
+              <details open className="rounded-2xl glass ring-soft p-5">
+                <summary className="cursor-pointer font-semibold text-lg">References</summary>
+                <ol className="mt-3 space-y-2 text-[0.975rem] leading-relaxed">
+                  {refs.map((r, i) => (
+                    <li key={i} className="leading-snug break-words">
+                      <span className="font-medium mr-2 opacity-90">[{i + 1}]</span>
+                      <Link href={r.href}>{r.label}</Link>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            </footer>
+          ) : null}
+
+          {/* Footer hotkeys */}
+          <div className="px-6 md:px-10 pb-6 text-sm md:text-base opacity-70 select-none">
+            <span className="mr-3">Hotkeys:</span>
+            <Kbd>←</Kbd> <Kbd>→</Kbd> navigate · <Kbd>Home</Kbd>/<Kbd>End</Kbd> jump · <Kbd>G</Kbd> index · <Kbd>R</Kbd> refs · <Kbd>T</Kbd> tests · <Kbd>?</Kbd> help
+          </div>
+        </div>
+      );
+    };
+
+    /* ===== Slides (content unchanged, but benefits from global type/spacing rules) ===== */
+    const slides = [
+      {
+        title: "Energy, AI, and Bitcoin — blending physics, economics, and cryptography to make renewable grids stable, fair, and profitable",
+        overline: "Title",
+        content: (
+          <div>
+            <h1 className="grad-text">
+              Energy, AI, and Bitcoin — blending physics, economics, and cryptography to make renewable grids stable, fair, and profitable
+            </h1>
+          </div>
+        ),
+        refs: [],
+      },
+      {
+        title: "1. The Challenge – Renewable Growth vs. Grid Instability",
+        overline: "Context",
+        content: (
+          <ul className="list-disc">
+            <li>
+              Renewables now supply <strong>47% of EU electricity</strong> (2024), up from 29% in 2023. (
+              <Link href="https://ember-energy.org/app/uploads/2025/01/EER_2025_22012025.pdf">Ember, 2025</Link>
+              )
+            </li>
+            <li>
+              <strong>Solar capacity doubled</strong> since 2019 → 263 GW in 2023. (
+              <Link href="https://www.reuters.com/business/energy/europes-solar-power-surge-hits-prices-exposing-storage-needs-2024-06-21">Reuters, 2024</Link>
+              )
+            </li>
+            <li>Negative prices increasing → overproduction without flexible demand/storage.</li>
+            <li>
+              <strong>Grid flexibility demand</strong>: will <strong>2× by 2030</strong> and <strong>3× by 2050</strong>. (
+              <Link href="https://cerre.eu/wp-content/uploads/2025/05/CERRE-Report_Flexibility_Final.pdf">CERRE, 2025</Link>
+              )
+            </li>
+            <li>
+              <strong>Storage is chronically underfunded</strong>: IEA NZE calls for ~970 GW grid-scale batteries by 2030 (≈ <strong>120 GW/yr</strong>), vs. ~86 GW installed in 2023 and ~69 GW added in 2024; grid battery storage investment was ~USD 40B in 2023—far below NZE trajectories. (
+              <Link href="https://www.iea.org/energy-system/electricity/grid-scale-storage">IEA – Grid-scale storage</Link>
+              ; <Link href="https://ember-energy.org/latest-insights/global-electricity-review-2025/the-big-picture/">Ember, 2025</Link>; <Link href="https://www.iea.org/reports/world-energy-investment-2024">IEA – World Energy Investment 2024</Link>)
+            </li>
+          </ul>
+        ),
+        refs: [
+          { label: "Ember (2025) – European Electricity Review", href: "https://ember-energy.org/app/uploads/2025/01/EER_2025_22012025.pdf" },
+          { label: "Reuters (2024) – Europe’s solar surge", href: "https://www.reuters.com/business/energy/europes-solar-power-surge-hits-prices-exposing-storage-needs-2024-06-21" },
+          { label: "CERRE (2025) – Flexibility report", href: "https://cerre.eu/wp-content/uploads/2025/05/CERRE-Report_Flexibility_Final.pdf" },
+          { label: "IEA – Grid-scale storage", href: "https://www.iea.org/energy-system/electricity/grid-scale-storage" },
+          { label: "IEA – World Energy Investment 2024", href: "https://www.iea.org/reports/world-energy-investment-2024" },
+          { label: "Ember – Global Electricity Review 2025 (Big Picture)", href: "https://ember-energy.org/latest-insights/global-electricity-review-2025/the-big-picture/" },
+        ],
+      },
+      {
+        title: "2. The Opportunity – Market Tailwinds",
+        overline: "Market",
+        content: (
+          <ul className="list-disc">
+            <li><strong>Advanced metering infrastructure</strong> in Europe: USD 5.7 bn (2024) → USD 12 bn (2032). (CAGR ~9.7%)</li>
+            <li>
+              <strong>Battery storage capacity in EU</strong>: 20 GWh today → <strong>120 GWh by 2029</strong>. (
+              <Link href="https://www.solarpowereurope.org/insights/outlooks/european-market-outlook-for-battery-storage-2025-2029/detail">SolarPower Europe, 2025</Link>
+              )
+            </li>
+            <li>
+              <strong>Flexibility markets in EU</strong>: forecast <strong>€40 bn/year by 2030</strong>. (
+              <Link href="https://cerre.eu/wp-content/uploads/2025/05/CERRE-Report_Flexibility_Final.pdf">CERRE, 2025</Link>
+              )
+            </li>
+          </ul>
+        ),
+        refs: [
+          { label: "SolarPower Europe – Battery Storage Outlook 2025–2029", href: "https://www.solarpowereurope.org/insights/outlooks/european-market-outlook-for-battery-storage-2025-2029/detail" },
+          { label: "CERRE (2025) – Flexibility report", href: "https://cerre.eu/wp-content/uploads/2025/05/CERRE-Report_Flexibility_Final.pdf" },
+        ],
+      },
+      {
+        title: "3. Our Solution – Proof-of-Power at the Grid Edge",
+        overline: "Solution",
+        content: (
+          <div>
+            <p><strong>Flywheel diagram</strong> (Edge → AI → Proof → Markets → Value)</p>
+            <ol className="list-decimal">
+              <li><strong>Sense</strong> — Smart meters read every 5s via ET device.</li>
+              <li><strong>Mesh</strong> — IKEA Dirigera links plugs, inverters, EVs, BESS.</li>
+              <li><strong>Think</strong> — On-prem AI forecasts load, detects anomalies, scores flexibility.</li>
+              <li><strong>Prove</strong> — Secure hardware & cryptography anchor attestations on-chain.</li>
+              <li><strong>Transmit</strong> — Mioty LPWAN → MQTT → Dual 5G + Starlink.</li>
+              <li><strong>Act</strong> — DSOs, aggregators, markets act on verified, pseudonymous signals.</li>
+            </ol>
+          </div>
+        ),
+        refs: [],
+      },
+      {
+        title: "4. Why Now",
+        overline: "Timing",
+        content: (
+          <ul className="list-disc">
+            <li>
+              <strong>Market signal:</strong> Negative/zero-price hours <strong>doubled across the EU in 2024</strong> (4% vs. 2% in 2023) — volatility/curtailment is now structural. (
+              <Link href="https://ember-energy.org/app/uploads/2025/01/EER_2025_22012025.pdf">Ember, 2025</Link>
+              )
+            </li>
+            <li>
+              <strong>Policy tailwind:</strong> The <strong>EU electricity market design reform</strong> entered into force <strong>16 Jul 2024</strong>, prioritising <strong>long-term contracts (PPAs, 2-way CfDs)</strong> and <strong>explicit flexibility</strong> procurement. (
+              <Link href="https://energy.ec.europa.eu/topics/markets-and-consumers/electricity-market-design_en">European Commission</Link>
+              )
+            </li>
+            <li>
+              <strong>Cost curve:</strong> <strong>Li-ion pack prices fell ~20% YoY to $115/kWh in 2024</strong> (record low), materially improving BESS economics. (
+              <Link href="https://about.bnef.com/insights/commodities/lithium-ion-battery-pack-prices-see-largest-drop-since-2017-falling-to-115-per-kilowatt-hour-bloombergnef/">BloombergNEF</Link>
+              )
+            </li>
+            <li>
+              <strong>Connectivity & speed:</strong> <strong>Mioty (ETSI TS 103 357)</strong> supports <strong>≥1M–1.5M msgs/day per base</strong> with <strong>up to 15 km</strong> rural / ~5 km urban coverage; balancing products are <strong>seconds-scale</strong> (<strong>FCR full activation ≈30 s</strong>; <strong>Nordic FFR 0.7–1.3 s</strong>), making <strong>sub-10 s edge telemetry/AI</strong> directly valuable. (
+              <Link href="https://www.etsi.org/deliver/etsi_ts/103300_103399/10335702/02.01.01_60/ts_10335702v020101p.pdf">ETSI TS 103 357-2</Link>; <Link href="https://mioty-alliance.com/wp-content/uploads/2025/07/public_Mioty-PhysicalLayerTechnology_rev1.pdf">mioty-alliance brief</Link>; <Link href="https://eepublicdownloads.entsoe.eu/clean-documents/Publications/SOC/safa/1_-_Policy_on_Load-Frequency_Control_and_Reserves.pdf">ENTSO-E policy</Link>; <Link href="https://eepublicdownloads.blob.core.windows.net/public-cdn-container/clean-documents/SOC%20documents/Nordic/2024/Overview_of_Frequency_Control_in_the_Nordic_Power_System.pdf">Nordic FFR</Link>)
+            </li>
+          </ul>
+        ),
+        refs: [
+          { label: "Ember (2025) – European Electricity Review", href: "https://ember-energy.org/app/uploads/2025/01/EER_2025_22012025.pdf" },
+          { label: "European Commission – Electricity Market Design", href: "https://energy.ec.europa.eu/topics/markets-and-consumers/electricity-market-design_en" },
+          { label: "BNEF – Battery pack prices 2024", href: "https://about.bnef.com/insights/commodities/lithium-ion-battery-pack-prices-see-largest-drop-since-2017-falling-to-115-per-kilowatt-hour-bloombergnef/" },
+          { label: "ETSI TS 103 357-2", href: "https://www.etsi.org/deliver/etsi_ts/103300_103399/10335702/02.01.01_60/ts_10335702v020101p.pdf" },
+          { label: "mioty alliance – Physical Layer brief", href: "https://mioty-alliance.com/wp-content/uploads/2025/07/public_Mioty-PhysicalLayerTechnology_rev1.pdf" },
+          { label: "ENTSO-E – Load-Frequency Control & Reserves Policy", href: "https://eepublicdownloads.entsoe.eu/clean-documents/Publications/SOC/safa/1_-_Policy_on_Load-Frequency_Control_and_Reserves.pdf" },
+          { label: "Nordic FCR/FFR overview", href: "https://eepublicdownloads.blob.core.windows.net/public-cdn-container/clean-documents/SOC%20documents/Nordic/2024/Overview_of_Frequency_Control_in_the_Nordic_Power_System.pdf" },
+        ],
+      },
+      {
+        title: "5. Stakeholders & Their Value",
+        overline: "Value Map",
+        content: (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-separate border-spacing-0">
+              <thead className="text-slate-300/90">
+                <tr>
+                  <th className="py-3 px-4 border-b border-slate-700 bg-slate-900/60">Stakeholder</th>
+                  <th className="py-3 px-4 border-b border-slate-700 bg-slate-900/60">Current Problem</th>
+                  <th className="py-3 px-4 border-b border-slate-700 bg-slate-900/60">With Proof-of-Power</th>
+                </tr>
+              </thead>
+              <tbody className="text-slate-100/95">
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Communities</td>
+                  <td className="px-4 py-3 border-r border-slate-800">No reward for flexibility</td>
+                  <td className="px-4 py-3">Earn via DR/VPP/PPA, privacy intact</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Aggregators</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Slow telemetry & control</td>
+                  <td className="px-4 py-3">5s cadence + predictive scoring</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">DSOs</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Blind behind meters</td>
+                  <td className="px-4 py-3">Dynamic P/Q/cosφ control, congestion relief</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Blockchain nets</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Weak oracles</td>
+                  <td className="px-4 py-3">Verifiable, pseudonymous data feeds</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Impact Investors</td>
+                  <td className="px-4 py-3 border-r border-slate-800">Greenwashing risk</td>
+                  <td className="px-4 py-3">On-chain measurable KPIs</td>
+                </tr>
+                <tr className="border-b border-slate-800 even:bg-slate-900/40">
+                  <td className="px-4 py-3 font-semibold border-r border-slate-800">Token Holders ($RETU/$REIN)</td>
+                  <td className="px-4 py-3 border-r border-slate-800">No exposure to energy transition data & infra</td>
+                  <td className="px-4 py-3">Coordination token ($RETU), infra yields ($REIN)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        ),
+        refs: [],
+      },
+      {
+        title: "6. Use Cases",
+        overline: "Applications",
+        content: (
+          <ul className="list-disc">
+            <li><strong>Flexibility & Demand Response</strong>: verified load shifts, paid in real-time.</li>
+            <li><strong>Virtual Power Plants</strong>: communities pooled for market bids.</li>
+            <li><strong>Substation Coordination</strong>: DSOs enforce P/Q/cosφ envelopes.</li>
+            <li><strong>Certificates & Data Markets</strong>: REC/GO issuance anchored in telemetry.</li>
+          </ul>
+        ),
+        refs: [],
+      },
+      {
+        title: "7. Token Economy – The Catalyst",
+        overline: "Tokens",
+        content: (
+          <div className="space-y-3">
+            <h3 className="font-semibold text-lg">$RETU Utility & Incentive Token</h3>
+            <ul className="list-disc">
+              <li>Pay protocol/API fees.</li>
+              <li>Stake for control rights (aggregators/DSOs).</li>
+              <li>Earn rewards: <strong>Proof-of-Productivity</strong> (data quality), <strong>Proof-of-Flexibility</strong> (delivered DR).</li>
+              <li>Slashing = loss of stake if underperforming.</li>
+            </ul>
+            <h3 className="font-semibold text-lg">$REIN Infrastructure Notes</h3>
+            <ul className="list-disc">
+              <li>Tokenized financing rail for batteries & gateways.</li>
+              <li>Funded in BTC/USDC/USDT.</li>
+              <li>Revenues (flexibility, capacity, PPA spreads) → coupon/principal distribution.</li>
+            </ul>
+          </div>
+        ),
+        refs: [],
+      },
+      {
+        title: "8. Token Flywheels",
+        overline: "Flywheels",
+        content: (
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold text-lg">RETU Flywheel Diagram:</h4>
+              <ol className="list-decimal">
+                <li>More devices installed → RETU bonds locked.</li>
+                <li>Better data & control → more market revenues.</li>
+                <li>Treasury collects protocol fees → buyback & burn RETU.</li>
+                <li>RETU scarcity + staking demand → price rises → more adoption.</li>
+              </ol>
+            </div>
+            <div>
+              <h4 className="font-semibold text-lg">REIN Flywheel Diagram:</h4>
+              <ol className="list-decimal">
+                <li>Investors fund infrastructure via REIN.</li>
+                <li>Assets earn flexibility revenues.</li>
+                <li>Repayments flow back to investors.</li>
+                <li>Surplus → RETU buyback/burn.</li>
+              </ol>
+            </div>
+          </div>
+        ),
+        refs: [],
+      },
+      {
+        title: "9. Growth Fantasy – The Numbers",
+        overline: "Scale",
+        content: (
+          <ul className="list-disc">
+            <li>
+              <strong>EU Smart meters:</strong> 250M by 2030. (
+              <Link href="https://energy.ec.europa.eu/topics/markets-and-consumers/smart-grids-and-meters_en">EU Commission</Link>
+              )
+            </li>
+            <li>If <strong>1% adoption = 2.5M devices</strong>, each bonds ~200 RETU → <strong>500M RETU locked</strong>.</li>
+            <li><strong>Flexibility market:</strong> €40B/year by 2030. Capturing 1% = <strong>€400M/year fee pool</strong>.</li>
+            <li><strong>Battery storage:</strong> 6× growth by 2029. Each €1M BESS = REIN tokenization.</li>
+          </ul>
+        ),
+        refs: [
+          { label: "EU Commission – Smart grids & meters", href: "https://energy.ec.europa.eu/topics/markets-and-consumers/smart-grids-and-meters_en" },
+          { label: "CERRE (2025) – Flexibility report", href: "https://cerre.eu/wp-content/uploads/2025/05/CERRE-Report_Flexibility_Final.pdf" },
+          { label: "SolarPower Europe – Battery Storage Outlook 2025–2029", href: "https://www.solarpowereurope.org/insights/outlooks/european-market-outlook-for-battery-storage-2025-2029/detail" },
+        ],
+      },
+      {
+        title: "10. Business Model",
+        overline: "Model",
+        content: (
+          <div className="space-y-3">
+            <ul className="list-disc">
+              <li><strong>Hardware:</strong> ET device sale + optional service plan.</li>
+              <li><strong>SaaS:</strong> Edge analytics, dashboards, compliance packs.</li>
+              <li><strong>Rev-share:</strong> Flexibility, VPP, PPA, certificate issuance.</li>
+              <li><strong>Tokenization & Financing (NEW):</strong>
+                <ul className="list-disc">
+                  <li><strong>REIN issuance & servicing:</strong> bps-tiered fees on tokenized BESS/SPV notes (origination, administration, reporting).</li>
+                  <li><strong>BTC-collateralized credit lines:</strong> margining/origination fees; covenant monitoring & liquidation-orchestration fees (only if triggered).</li>
+                  <li><strong>Registry & secondary market:</strong> listing/transfer/settlement fees; whitelisting/KYC access fees.</li>
+                  <li><strong>Attestation oracles:</strong> metering/telemetry verification fees (bundled or paid from coupon).</li>
+                </ul>
+              </li>
+              <li><strong>Marketplace:</strong> token-gated data feeds & AI plug-ins; premium APIs.</li>
+              <li><strong>Treasury:</strong> protocol fees → <strong>RETU</strong> buyback/burn + insurance reserve; governance staking incentives.</li>
+            </ul>
+          </div>
+        ),
+        refs: [],
+      },
+      {
+        title: "11. Roadmap",
+        overline: "Plan",
+        content: (
+          <ul className="list-disc">
+            <li><strong>Phase 0 (Pilot, ≤100 homes)</strong>: measure KPIs, prove cadence & control.</li>
+            <li><strong>Phase 1 (≤1,500 homes)</strong>: VPP activation, token-gated settlement.</li>
+            <li><strong>Phase 2 (Substation integration)</strong>: enforce PCC envelopes, congestion relief.</li>
+            <li><strong>Phase 3 (Regional scale)</strong>: federated communities, investor dashboards.</li>
+          </ul>
+        ),
+        refs: [],
+      },
+      {
+        title: "12. The Ask",
+        overline: "Funding",
+        content: (
+          <ul className="list-disc">
+            <li>Raise <strong>€X million</strong> in blended equity + token issuance.</li>
+            <li>Deploy pilots, expand team, develop registry & staking infra.</li>
+            <li>Target ROI: measurable € flows from flexibility + RETU value growth in 24 months.</li>
+          </ul>
+        ),
+        refs: [],
+      },
+      {
+        title: "13. Closing Vision",
+        overline: "Vision",
+        content: (
+          <blockquote className="border-l-2 border-white/20 pl-4">
+            <p>
+              <em>
+                Renewables become harmony only when ramp-rates and reactive power are tuned — and proven. By blending physics,
+                economics, and cryptography, we make the grid stable, fair, and profitable for all. $RETU and $REIN are the
+                catalysts turning proof into power, and power into growth.
+              </em>
+            </p>
+          </blockquote>
+        ),
+        refs: [],
+      },
+      /* Appendix — Technical Slides */
+      {
+        title: "14. Two-Layer Architecture (Fleet + Site)",
+        overline: "Appendix",
+        content: (
+          <ul className="list-disc">
+            <li><strong>Purpose:</strong> Fast, safe control on-site; coordinated, scheduled control at homes.</li>
+            <li><strong>Roles:</strong> <strong>DSO/VNB</strong> sets PCC limits · <strong>Microgrid (site)</strong> keeps PCC compliant · <strong>Aggregator</strong> mobilizes homes.</li>
+            <li><strong>Flow:</strong> DSO setpoint → site ramps PV/BESS; site requests <strong>±kW blocks</strong> from the fleet; homes follow <strong>time-tagged schedules</strong>.</li>
+            <li><strong>Privacy:</strong> Only <strong>aggregated KPIs</strong> (P_up/P_down, confidence) go upstream.</li>
+            <li><strong>Why this split:</strong> Resilience (local loops), scalability (hundreds of homes), clear PCC accountability.</li>
+          </ul>
+        ),
+        refs: [],
+      },
+      {
+        title: "15. Fleet Layer (Homes + Smart-Meter Access)",
+        overline: "Appendix",
+        content: (
+          <ul className="list-disc">
+            <li><strong>What’s connected:</strong> Home gateway reads <strong>smart meter</strong> + devices (heat pump, boiler, home battery, EV charger).</li>
+            <li><strong>Data up / down commands:</strong> Uplink <strong>every 1–5 min</strong> (power, energy, SoC, constraints) · Downlink <strong>15-min schedules</strong> with <code>effective_from</code>, caps, one-shots.</li>
+            <li><strong>Comms & device protocols:</strong> LPWAN (<strong>mioty</strong>) via Network Server to Aggregator; devices via <strong>EEBUS / Modbus / HTTP / MQTT</strong>; EV via <strong>OCPP</strong> or local API.</li>
+            <li><strong>Reliability & privacy:</strong> If the link drops, homes run the <strong>last valid schedule</strong>; site sees <strong>aggregates only</strong>.</li>
+            <li><strong>Outcome:</strong> Many small assets behave like a predictable <strong>flexibility portfolio</strong>.</li>
+          </ul>
+        ),
+        refs: [],
+      },
+      {
+        title: "16. Site Layer (Microgrid On-Site)",
+        overline: "Appendix",
+        content: (
+          <ul className="list-disc">
+            <li><strong>Controllers:</strong> <strong>PFC200 (EMS)</strong> for PV/BESS ramps; <strong>PFC300</strong> handles <strong>IEC-104</strong> + Northbound API to Aggregator.</li>
+            <li><strong>Operation:</strong> DSO setpoint → immediate PV/BESS action; <strong>±kW fleet requests</strong> for upcoming blocks.</li>
+            <li><strong>Assurance:</strong> <strong>PCC meter</strong> is truth; BESS trims mismatch to meet commitment.</li>
+            <li><strong>Connectivity & security:</strong> Industrial router (e.g., <strong>RUTX50</strong>) with VPN/failover; TLS; NTP/RTC; defined fallbacks.</li>
+            <li><strong>Deployment:</strong> Cloud- vs <strong>edge-centric</strong> (on-site MNS + Aggregator). Target: <strong>±X kW in 5–10 min</strong>, PCC match within tolerance.</li>
+          </ul>
+        ),
+        refs: [],
+      },
+      {
+        title: "17. Devices We Developed",
+        overline: "Appendix",
+        content: (
+          <ul className="list-disc">
+            <li><strong>Energy Agent (Home Gateway):</strong> mioty uplink/downlink; DLMS/COSEM; EEBUS/Modbus/HTTP/MQTT drivers; RTC; optional secure element (ESP32-C6).</li>
+            <li><strong>RDDL Smart Plug (ESP32-C6, Zigbee):</strong> Full Metering/Electrical Measurement clusters; correct scaling; configurable reporting.</li>
+            <li><strong>DLMS D0 Opto + Interface:</strong> ESP32 HDLC/DLMS decrypt/parse (AES-CTR/GMAC, HLS5); OBIS mapping (e.g., Siemens IM350, ISKRA AM550).</li>
+            <li><strong>Edge Flex Controller (optional):</strong> On-site hosting for <strong>mioty Network Server + Aggregator</strong>.</li>
+            <li><strong>PCC-Integration Kit:</strong> PCC data tap & time-sync handoff to EMS/PFCs.</li>
+          </ul>
+        ),
+        refs: [],
+      },
+      {
+        title: "18. Software We Built (Fleet & Aggregator)",
+        overline: "Appendix",
+        content: (
+          <div>
+            <p><strong>All applications are Dart/Flutter and cross-platform (Web, iOS, Android, Desktop).</strong></p>
+            <ul className="list-disc">
+              <li><strong>Energy Agent Firmware:</strong> Device drivers; <strong>Schedule Executor</strong> (15-min, time-tagged); guards (SoC_min/max, DHW, anti-short-cycle); link-loss fallbacks; consent/privacy logs.</li>
+              <li><strong>mioty MNS Connector:</strong> Uplink aggregation; downlink fan-out; signed compact JSON payloads.</li>
+              <li><strong>EV Charging Integration:</strong> OCPP client/bridge or direct charger APIs; “read-along” + control; optional evcc/Home Assistant hooks.</li>
+              <li><strong>Scheduler & Portfolio Optimizer (Aggregator):</strong> Forecasts; block dispatch (±kW); caps; KPIs (P_up/P_down, confidence, horizon); delivery reports & M&V.</li>
+            </ul>
+          </div>
+        ),
+        refs: [],
+      },
+      {
+        title: "19. Software We Built (Site & Ops Tools)",
+        overline: "Appendix",
+        content: (
+          <div>
+            <p><strong>All applications are Dart/Flutter and cross-platform (Web, iOS, Android, Desktop).</strong></p>
+            <ul className="list-disc">
+              <li><strong>PFC200 EMS App:</strong> Fast PV/BESS loops, ramps/limits, local fallback strategies.</li>
+              <li><strong>PFC300 Protocol Brain:</strong> <strong>IEC-104</strong> handling; MQTT/REST northbound; <strong>PCC delivery tracking</strong>; automatic <strong>±kW</strong> fleet requests for next blocks.</li>
+              <li><strong>Connectivity & Security Profiles:</strong> RUTX50 VPN/failover; TLS; NTP/RTC; RBAC; cloud/edge deployment profiles.</li>
+              <li><strong>Ops & Dev Tooling:</strong> PyQt smart-energy dashboard (live pricing, anomalies, ops views); Dirigera scanner/auth (mDNS + PKCE); DLMS/HDLC toolchain; secure-element driver (ESP32-C6).</li>
+            </ul>
+          </div>
+        ),
+        refs: [],
+      },
+      {
+        title: "20. Acronyms (Cheat Sheet)",
+        overline: "Appendix",
+        content: (
+          <p>
+            <span className="block"><strong>AES-CTR / GMAC</strong> Encryption / auth tag</span>
+            <span className="block"><strong>CSMS</strong> Charging Station Management System</span>
+            <span className="block"><strong>D0</strong> Optical meter interface</span>
+            <span className="block"><strong>DERMS</strong> Distributed Energy Resource Management System (Aggregator)</span>
+            <span className="block"><strong>DHW</strong> Domestic Hot Water</span>
+            <span className="block"><strong>DLMS/COSEM</strong> Smart-metering standard</span>
+            <span className="block"><strong>DSO/VNB</strong> Distribution System Operator / Verteilnetzbetreiber</span>
+            <span className="block"><strong>EDA / AS4 / ebMS3</strong> Austria market messaging / secure B2B transport / messaging standard (market comms, not real-time control)</span>
+            <span className="block"><strong>EEBUS</strong> Energy device interoperability</span>
+            <span className="block"><strong>EMS</strong> Energy Management System</span>
+            <span className="block"><strong>EV / EVSE</strong> Electric Vehicle / EV charger</span>
+            <span className="block"><strong>evcc</strong> PV-optimized EV charging controller</span>
+            <span className="block"><strong>HA</strong> Home Assistant</span>
+            <span className="block"><strong>HLS5</strong> High-Level Security mode 5</span>
+            <span className="block"><strong>IEC-104</strong> Telecontrol (DSO ↔ site)</span>
+            <span className="block"><strong>IEC 61850</strong> Substation/DER comms</span>
+            <span className="block"><strong>IGMP / VLAN / QoS</strong> Network multicast / segmentation / prioritization</span>
+            <span className="block"><strong>KPI</strong> Key Performance Indicator</span>
+            <span className="block"><strong>M&V</strong> Measurement & Verification</span>
+            <span className="block"><strong>MGO</strong> Microgrid Operator</span>
+            <span className="block"><strong>mioty / MNS</strong> LPWAN tech / mioty Network Server</span>
+            <span className="block"><strong>MQTT / REST</strong> Pub-sub / HTTP API</span>
+            <span className="block"><strong>NPT / NTP / RTC</strong> Time protocols/clocks</span>
+            <span className="block"><strong>NZE</strong> Net Zero Emission</span>
+            <span className="block"><strong>OBIS</strong> Meter datapoint IDs</span>
+            <span className="block"><strong>OCPP</strong> Open Charge Point Protocol</span>
+            <span className="block"><strong>OPC UA</strong> Industrial interoperability</span>
+            <span className="block"><strong>PCC</strong> Point of Common Coupling</span>
+            <span className="block"><strong>PFC200 / PFC300</strong> WAGO controllers (EMS / protocol brain)</span>
+            <span className="block"><strong>PTP / NTP / RTC</strong> Time protocols/clocks</span>
+            <span className="block"><strong>RBAC</strong> Role-based access control</span>
+            <span className="block"><strong>RUTX50</strong> Teltonika industrial router</span>
+            <span className="block"><strong>SMA</strong> Smart-Meter Access (home smart-meter connectivity)</span>
+            <span className="block"><strong>SoC</strong> State of Charge</span>
+          </p>
+        ),
+        refs: [],
+      },
+    ];
+
+    /* ===== Deck container & overlays ===== */
+    function Deck(){
+      const [i, setI] = useState(0);
+      const [showIndex, setShowIndex] = useState(false);
+      const [showRefs, setShowRefs] = useState(true);
+      const [showHelp, setShowHelp] = useState(false);
+      const [showTests, setShowTests] = useState(false);
+      const count = slides.length;
+
+      const go = (n) => setI(Math.min(Math.max(n, 0), count - 1));
+      const next = () => go(i + 1);
+      const prev = () => go(i - 1);
+
+      useEffect(() => {
+        const onKey = (e) => {
+          if (e.key === "ArrowRight") next();
+          else if (e.key === "ArrowLeft") prev();
+          else if (e.key.toLowerCase() === "g") setShowIndex(v => !v);
+          else if (e.key.toLowerCase() === "r") setShowRefs(v => !v);
+          else if (e.key.toLowerCase() === "t") setShowTests(v => !v);
+          else if (e.key === "Home") go(0);
+          else if (e.key === "End") go(count - 1);
+          else if (e.key === "?") setShowHelp(v => !v);
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+      }, [i, count]);
+
+      const slide = slides[i];
+
+      // Minimal runtime checks (press T)
+      const tests = [
+        {name: 'Has slides', pass: slides.length >= 10, details: `count=${slides.length}`},
+        {name: 'Tokens renamed', pass: JSON.stringify(slides).includes('$RETU') && JSON.stringify(slides).includes('$REIN')},
+        {name: 'Each slide has title', pass: slides.every(s => !!s.title)},
+      ];
+
+      return (
+        <div className="relative overflow-hidden">
+          <div className="grid-overlay"></div>
+          <div className="mx-auto max-w-[1400px]">
+            <SlideShell
+              slideNo={i + 1}
+              slideCount={count}
+              title={slide.title}
+              overline={slide.overline}
+              onNext={next}
+              onPrev={prev}
+              onToggleIndex={() => setShowIndex(v => !v)}
+              onToggleRefs={() => setShowRefs(v => !v)}
+              showRefs={showRefs}
+              refs={slide.refs}
+            >
+              {slide.content}
+            </SlideShell>
+          </div>
+
+          {/* Index overlay */}
+          {showIndex && (
+            <div className="fixed inset-0 bg-black/55 backdrop-blur-sm p-6 overflow-auto" onClick={(e)=>e.stopPropagation()}>
+              <div className="mx-auto max-w-6xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white text-2xl font-semibold">Slide index</h3>
+                  <button className="rounded-lg border border-white/40 text-white px-4 py-2 hover:bg-white/10" onClick={()=>setShowIndex(false)}>Close</button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {slides.map((s, idx) => (
+                    <button
+                      key={idx}
+                      onClick={()=>{ setI(idx); setShowIndex(false); }}
+                      className={`rounded-2xl text-left p-5 glass ring-soft hover:neon transition-base text-slate-100 ${idx === i ? 'ring-2 ring-white/60' : ''}`}
+                    >
+                      <div className="text-sm opacity-70 mb-1">{idx + 1} / {count}</div>
+                      <div className="font-semibold line-clamp-2">{s.title}</div>
+                      <div className="text-xs opacity-70 mt-1">{s.overline}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Help overlay */}
+          {showHelp && (
+            <div className="fixed inset-0 bg-black/60 text-white p-6" onClick={()=>setShowHelp(false)}>
+              <div className="mx-auto max-w-xl bg-black/30 rounded-2xl p-6 border border-white/20">
+                <h3 className="text-2xl font-semibold mb-3">Keyboard Shortcuts</h3>
+                <p className="mb-3">Use these to present smoothly:</p>
+                <ul className="space-y-2">
+                  <li><Kbd>→</Kbd> next, <Kbd>←</Kbd> previous</li>
+                  <li><Kbd>Home</Kbd> first slide, <Kbd>End</Kbd> last slide</li>
+                  <li><Kbd>G</Kbd> toggle index grid</li>
+                  <li><Kbd>R</Kbd> toggle references</li>
+                  <li><Kbd>T</Kbd> toggle tests</li>
+                  <li><Kbd>?</Kbd> toggle this help</li>
+                </ul>
+                <div className="mt-4 text-sm opacity-70">Click anywhere on a slide to advance. Use your browser's Print function for a PDF export.</div>
+              </div>
+            </div>
+          )}
+
+          {/* Tests overlay */}
+          {showTests && (
+            <div className="fixed inset-0 bg-black/70 text-white p-6" onClick={()=>setShowTests(false)}>
+              <div className="mx-auto max-w-xl bg-black/30 rounded-2xl p-6 border border-white/20">
+                <h3 className="text-2xl font-semibold mb-3">Runtime Tests</h3>
+                <ul className="space-y-2">
+                  {tests.map((t, idx) => (
+                    <li key={idx} className="flex items-center gap-3">
+                      <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm ${t.pass ? 'bg-emerald-500' : 'bg-rose-500'}`}>{t.pass ? '✓' : '✗'}</span>
+                      <span>{t.name}{t.details ? ` — ${t.details}` : ''}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-4 text-sm opacity-70">Press <Kbd>T</Kbd> again to close.</div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* Mount */
+    const root = ReactDOM.createRoot(document.getElementById('app'));
+    root.render(<Deck />);
+  </script>
+</body>
+</html>
