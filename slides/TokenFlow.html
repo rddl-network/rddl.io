@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDDL Foundation - Token Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 80px;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .logo {
+            position: absolute;
+            top: 40px;
+            left: 80px;
+            height: 40px;
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 40px;
+            left: 80px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        h1 {
+            font-size: 64px;
+            font-weight: 300;
+            margin-bottom: 30px;
+            line-height: 1.2;
+            color: #ffffff;
+        }
+
+        h2 {
+            font-size: 48px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            margin-top: 0;
+            color: #00ff88;
+        }
+
+        h3 {
+            font-size: 32px;
+            font-weight: 400;
+            margin-bottom: 25px;
+            color: #00ff88;
+        }
+
+        p, li {
+            font-size: 26px;
+            line-height: 1.6;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        ul li {
+            padding-left: 30px;
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        ul li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            max-width: 1200px;
+            padding-top: 80px;
+        }
+
+        .highlight {
+            color: #00ff88;
+            font-weight: 500;
+        }
+
+        .title-slide h1 {
+            font-size: 72px;
+            margin-top: 200px;
+        }
+
+        .title-slide p {
+            font-size: 28px;
+            color: #999;
+            margin-top: 20px;
+        }
+
+        .quote {
+            background: #1a1a1a;
+            border-left: 4px solid #00ff88;
+            padding: 30px;
+            margin: 30px 0;
+            font-style: italic;
+            font-size: 24px;
+            color: #ccc;
+        }
+
+        .card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 28px;
+            border: 1px solid #333;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #00ff88;
+            color: #0a0a0a;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .badge.blue {
+            background: #00d4ff;
+        }
+
+        .badge.gold {
+            background: #ffd700;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .flow-index {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+            background: #00ff88;
+            color: #0a0a0a;
+        }
+
+        .flow-index.blue {
+            background: #00d4ff;
+        }
+
+        .flow-index.gold {
+            background: #ffd700;
+        }
+
+        .validation-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 18px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .validation-table th,
+        .validation-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #333;
+            vertical-align: top;
+        }
+
+        .validation-table th {
+            text-align: left;
+            font-size: 18px;
+            color: #00ff88;
+            font-weight: 600;
+            background: #141414;
+        }
+
+        .validation-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .controls {
+            position: fixed;
+            right: 40px;
+            bottom: 40px;
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        button {
+            background: #1a1a1a;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        button:hover {
+            background: #00ff88;
+            color: #0a0a0a;
+        }
+
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+    </style>
+    <link rel="stylesheet" href="styles/dropdown-fix.css">
+</head>
+<body>
+    <div class="presentation">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide">
+            <img src="../images/rddl-Ldot-glyph-square-flush-512.png" alt="RDDL Foundation" class="logo">
+            <div class="content">
+                <h1>RDDL Token Flow</h1>
+                <p>Dual-Token Economics & Proof-of-Productivity</p>
+            </div>
+            <div class="slide-number">1 / 6</div>
+        </div>
+
+        <!-- Slide 2: Dual-Token Architecture -->
+        <div class="slide">
+            <img src="../images/rddl-Ldot-glyph-square-flush-512.png" alt="RDDL Foundation" class="logo">
+            <div class="content">
+                <h2>Dual-Token Architecture</h2>
+                <div style="display:flex;gap:40px;">
+                    <div class="card" style="flex:1;">
+                        <div class="badge">RDDL Token (L2)</div>
+                        <h3 style="margin-top:16px;color:#00ff88;">Liquid Network</h3>
+                        <ul style="margin-top:20px;">
+                            <li>Floating utility and incentive token</li>
+                            <li>Issued on Liquid for fast, confidential settlement</li>
+                            <li>Primary rewards and value-capture vehicle</li>
+                            <li>Market-driven price discovery</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="flex:1;">
+                        <div class="badge blue">PLMNT Token (L1)</div>
+                        <h3 style="margin-top:16px;color:#00d4ff;">Planetmint</h3>
+                        <ul style="margin-top:20px;">
+                            <li>Pegged service token (stable-unit)</li>
+                            <li>Pegged to 1 Watt solar cost: €0.0004</li>
+                            <li>Used for on-chain services & notarization</li>
+                            <li>Only minted by exchanging RDDL</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">2 / 6</div>
+        </div>
+
+        <!-- Slide 3: Proof-of-Productivity -->
+        <div class="slide">
+            <img src="../images/rddl-Ldot-glyph-square-flush-512.png" alt="RDDL Foundation" class="logo">
+            <div class="content">
+                <h2>Proof-of-Productivity (PoP)</h2>
+                <p style="font-size:28px;color:#00d4ff;margin-bottom:30px;">Hardware-anchored incentives for real-world energy productivity</p>
+                <div style="display:flex;gap:40px;">
+                    <div style="flex:1;display:flex;flex-direction:column;gap:20px;">
+                        <div class="flow-step">
+                            <div class="flow-index gold">1</div>
+                            <div style="font-size:20px;color:#e0e0e0;">Machine is onboarded with HW-03 and registered as an Industrial Machine NFT (DID).</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-index">2</div>
+                            <div style="font-size:20px;color:#e0e0e0;">Initial grant: 8,600 PLMNT for one year of hourly notarization.</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-index blue">3</div>
+                            <div style="font-size:20px;color:#e0e0e0;">Telemetry is signed on-device and notarized at 1 PLMNT per record.</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-index gold">4</div>
+                            <div style="font-size:20px;color:#e0e0e0;">PoP participation rewards the owner in RDDL tokens.</div>
+                        </div>
+                    </div>
+                    <div class="card" style="flex:0.9;">
+                        <h3 style="color:#00ff88;">Why it matters</h3>
+                        <ul style="margin-top:20px;">
+                            <li>Verifiable machine identity</li>
+                            <li>Signed data minimizes oracle risk</li>
+                            <li>Economic incentives tied to productivity</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">3 / 6</div>
+        </div>
+
+        <!-- Slide 4: Supply & Distribution -->
+        <div class="slide">
+            <img src="../images/rddl-Ldot-glyph-square-flush-512.png" alt="RDDL Foundation" class="logo">
+            <div class="content">
+                <h2>Supply & Distribution Logic</h2>
+                <ul>
+                    <li><span class="highlight">Initial valuation:</span> RDDL at €0.04, establishing a 100:1 ratio to PLMNT (€0.0004).</li>
+                    <li><span class="highlight">Mining/Incentives:</span> Majority of supply distributed to productive machines.</li>
+                    <li><span class="highlight">Liquidity:</span> 10% of the initial DAO pool seeded into the Planetmint exchange.</li>
+                    <li><span class="highlight">Deflationary pressure:</span> PLMNT can only be minted by locking/spending RDDL.</li>
+                    <li><span class="highlight">Adoption flywheel:</span> More machines → more PLMNT demand → less RDDL in circulation.</li>
+                </ul>
+            </div>
+            <div class="slide-number">4 / 6</div>
+        </div>
+
+        <!-- Slide 5: Technical Validation -->
+        <div class="slide">
+            <img src="../images/rddl-Ldot-glyph-square-flush-512.png" alt="RDDL Foundation" class="logo">
+            <div class="content">
+                <h2>Technical Validation</h2>
+                <table class="validation-table">
+                    <thead>
+                        <tr>
+                            <th style="width:22%;">Feature</th>
+                            <th style="width:24%;">Technical Validity</th>
+                            <th>Assessment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Oracle Problem</td>
+                            <td><span class="badge">Solved via Hardware</span></td>
+                            <td>Secure Elements (TROPIC01) and HW-03 sign data at the source to prevent garbage-in/garbage-out.</td>
+                        </tr>
+                        <tr>
+                            <td>Scalability</td>
+                            <td><span class="badge blue">Layer Separation</span></td>
+                            <td>Liquid handles financial transactions while Planetmint manages high-frequency notarization.</td>
+                        </tr>
+                        <tr>
+                            <td>Cost Predictability</td>
+                            <td><span class="badge gold">Pegged Service Token</span></td>
+                            <td>PLMNT at €0.0004 delivers stable OPEX for industrial operators.</td>
+                        </tr>
+                        <tr>
+                            <td>Economic Alignment</td>
+                            <td><span class="badge">Productivity-Link</span></td>
+                            <td>Value accrues from real-world energy data rather than speculation.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="slide-number">5 / 6</div>
+        </div>
+
+        <!-- Slide 6: Summary -->
+        <div class="slide">
+            <img src="../images/rddl-Ldot-glyph-square-flush-512.png" alt="RDDL Foundation" class="logo">
+            <div class="content" style="align-items: center; text-align: center;">
+                <h1 style="margin-top: 180px;">Summary Recommendation</h1>
+                <div class="quote" style="max-width:900px;">
+                    Technically sound for IIoT: solves industry volatility via PLMNT while incentivizing network growth via RDDL.
+                    Primary risk remains Liquid federation reliance and the hardware adoption curve.
+                </div>
+                <p style="margin-top: 20px; font-size: 24px; color:#999;">RDDL token flow aligns incentives with measurable productivity.</p>
+            </div>
+            <div class="slide-number">6 / 6</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+        <button id="nextBtn" onclick="changeSlide(1)">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'ArrowLeft' || e.key === 'ArrowUp') && currentSlide > 0) {
+                changeSlide(-1);
+            }
+            if ((e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'Enter') && currentSlide < totalSlides - 1) {
+                e.preventDefault();
+                changeSlide(1);
+            }
+        });
+
+        document.getElementById('prevBtn').disabled = true;
+    </script>
+</body>
+</html>
