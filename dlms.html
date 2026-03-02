@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EU‑27 Smart Meter Companion Specs Map (DLMS/COSEM)</title>
+
+  <!-- Leaflet (OpenStreetMap) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <style>
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .app { height: 100%; display: grid; grid-template-columns: 420px 1fr; position: relative; }
+
+    /* IMPORTANT: ensure the sidebar stays clickable even if Leaflet panes overflow */
+    .sidebar {
+      border-right: 1px solid #e5e7eb;
+      padding: 14px 14px 10px;
+      overflow: auto;
+      position: relative;
+      z-index: 1000;
+      background: #ffffff;
+    }
+
+    .map { height: 100%; position: relative; z-index: 0; overflow: hidden; }
+    .leaflet-container { z-index: 0; }
+
+    h1 { font-size: 16px; margin: 0 0 10px; }
+    .muted { color: #6b7280; font-size: 12px; line-height: 1.45; }
+
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; margin-left: 6px; border: 1px solid #e5e7eb; }
+    .pill.ok { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+    .pill.warn { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+
+    .box { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; margin: 12px 0; }
+    .box h2 { font-size: 13px; margin: 0 0 8px; }
+    .box ul { margin: 0; padding-left: 18px; }
+    .box li { margin: 6px 0; }
+
+    .search { width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 10px; border: 1px solid #e5e7eb; outline: none; }
+    .countries { margin-top: 10px; }
+
+    .row { display: flex; gap: 8px; align-items: center; }
+    .row.wrap { flex-wrap: wrap; }
+
+    .btn {
+      appearance: none;
+      border: 1px solid #e5e7eb;
+      background: white;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .btn:hover { background: #f9fafb; }
+
+    .country-btn {
+      width: 100%;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: white;
+      cursor: pointer;
+      margin: 6px 0;
+    }
+    .country-btn:hover { background: #f9fafb; }
+
+    .small { font-size: 12px; }
+
+    /* Links inside the sidebar: use buttons so they still work in sandboxed previews */
+    .link-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .link-title { flex: 1; min-width: 0; }
+    .link-title strong { font-weight: 600; }
+    .link-actions { display: inline-flex; gap: 6px; flex-shrink: 0; }
+
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      color: #374151;
+    }
+
+    select {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      background: white;
+      cursor: pointer;
+    }
+
+    label { font-size: 12px; color: #111827; }
+
+    .callout { margin-top: 10px; padding: 10px; border-radius: 12px; border: 1px dashed #e5e7eb; background: #fafafa; }
+
+    .toast {
+      position: fixed;
+      left: 14px;
+      bottom: 14px;
+      background: rgba(17, 24, 39, 0.92);
+      color: white;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      z-index: 99999;
+      max-width: 380px;
+      display: none;
+    }
+
+    @media (max-width: 960px) {
+      .app { grid-template-columns: 1fr; grid-template-rows: 46vh 54vh; }
+      .sidebar { border-right: none; border-top: 1px solid #e5e7eb; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="sidebar">
+      <h1>
+        EU‑27 DLMS/COSEM companion specs map
+        <span id="statusPill" class="pill warn">Loading…</span>
+      </h1>
+
+      <div class="muted">
+        Click a country, then optionally click a subdivision. Subdivisions use <span class="kbd">NUTS</span> boundaries so you can drill down.
+        Many detailed DLMS/COSEM “dialects” (object lists, security parameterization) are still distributed via DSOs and vendors rather than being publicly registered.
+      </div>
+
+      <div class="box">
+        <h2>Controls</h2>
+        <div class="row wrap" style="margin-bottom:8px;">
+          <button id="btnReset" class="btn" type="button">Reset view</button>
+          <label class="row" style="gap:6px;">
+            <input id="toggleSub" type="checkbox" checked />
+            Show subdivisions
+          </label>
+        </div>
+        <div class="row wrap">
+          <label for="subLevel" class="muted" style="margin-right:6px;">Subdivision level</label>
+          <select id="subLevel">
+            <option value="auto" selected>Auto (recommended)</option>
+            <option value="1">NUTS 1</option>
+            <option value="2">NUTS 2</option>
+            <option value="3">NUTS 3</option>
+          </select>
+          <span class="muted">(Germany/Belgium auto→NUTS1; most others auto→NUTS2)</span>
+        </div>
+      </div>
+
+      <div id="details" class="box" style="display:none;">
+        <h2 id="countryTitle">—</h2>
+        <div id="countryNotes" class="muted" style="margin-bottom:8px;"></div>
+        <div id="docs"></div>
+      </div>
+
+      <div class="box">
+        <h2>Europe‑wide anchors (useful everywhere)</h2>
+        <ul class="small">
+          <li><a href="https://www.dlms.com/core-specifications/" target="_blank" rel="noopener">DLMS UA Core Specifications</a></li>
+          <li><a href="https://www.dlms.com/generic-companion-profiles/" target="_blank" rel="noopener">DLMS UA Generic Companion Profiles (GCPs)</a></li>
+          <li><a href="https://www.dlms.com/certified-devices/" target="_blank" rel="noopener">DLMS UA Certified Devices list</a></li>
+          <li><a href="https://www.dlms.com/qualification/" target="_blank" rel="noopener">DLMS UA Qualification (certification)</a></li>
+          <li><a href="https://oms-group.org/en/specification/" target="_blank" rel="noopener">OMS specs (wired/wireless M‑Bus ecosystem)</a></li>
+        </ul>
+        <div class="muted small">
+          If a national companion spec isn’t public, your next best “registry-like” sources are DLMS UA certification entries and DSO tender/integration annexes.
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>Jump to a country</h2>
+        <input id="search" class="search" placeholder="Filter (e.g., DE, Italy, Sweden)..." />
+        <div id="countryList" class="countries"></div>
+      </div>
+
+      <div class="callout muted small">
+        If external links don’t open in this preview, use the <span class="kbd">Copy</span> button next to a document to copy the URL.
+      </div>
+
+      <div class="muted small" style="margin-top:10px;">
+        Add more documents by editing <code>COUNTRY_DATA</code> and (optionally) <code>SUBREGION_DATA</code> in this HTML.
+      </div>
+    </div>
+
+    <div id="map" class="map"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+<script>
+  // -----------------------------
+  // Data
+  // -----------------------------
+
+  // EU‑27 ISO codes
+  const EU27 = new Set(["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","ES","SE"]);
+
+  // Prefer subdivision level per country ("Auto")
+  // Notes:
+  // - Germany: NUTS1 ~ Bundesländer
+  // - Belgium: NUTS1 ~ Regions
+  // - Spain: NUTS2 ~ Autonomous Communities
+  // - Austria: NUTS2 ~ Bundesländer
+  // - Italy/France/Netherlands: NUTS2 is a good "region" level
+  const COUNTRY_AUTO_LEVEL = {
+    DE: 1,
+    BE: 1,
+    AT: 2,
+    ES: 2,
+    IT: 2,
+    FR: 2,
+    NL: 2,
+  };
+
+  // Public companion specs / interoperability profiles (curated starter set)
+  const COUNTRY_DATA = {
+    AT: { label: "Austria", publicDocs: [
+      { title: "Österreichs Energie – Requirements catalog: End‑to‑End Security for Smart Metering (PDF)", url: "https://oesterreichsenergie.at/fileadmin/user_upload/Oesterreichs_Energie/Publikationsdatenbank/Diverses/2024/E2E-Sicherheit-Anforderungskatalog_2023_ENGLISH.pdf", tag: "Security / requirements" }
+    ], notes: "Public security/requirements docs exist; detailed DLMS object models are typically in DSO/vendor integration annexes." },
+
+    BE: { label: "Belgium", publicDocs: [
+      { title: "Fluvius – Technical specification user ports of digital meters (PDF)", url: "https://www.fluvius.be/sites/fluvius/files/2020-03/1901-fluvius-technical-specification-user-ports-digital-meter.pdf", tag: "HAN / user port" },
+      { title: "Fluvius – Smart Metering System eMUCs P1 v1.5 (PDF)", url: "https://partner.fluvius.be/sites/fluvius/files/2025-09/smart-metering-system-emucs-p1-v1-5.pdf", tag: "System companion" }
+    ], notes: "Belgium’s public docs are often published by Fluvius for customer ports and system companions." },
+
+    BG: { label: "Bulgaria", publicDocs: [], notes: "" },
+    HR: { label: "Croatia", publicDocs: [], notes: "" },
+    CY: { label: "Cyprus", publicDocs: [], notes: "" },
+    CZ: { label: "Czechia", publicDocs: [], notes: "" },
+
+    DK: { label: "Denmark", publicDocs: [
+      { title: "Green Power Denmark – Branch standard for the external (H1) port (PDF)", url: "https://greenpowerdenmark.dk/files/media/document/Branchestandard-for-fjernaflaeste-elmaaleres-eksterne-port.pdf", tag: "HAN / H1" }
+    ], notes: "Industry branch standard for the external H1 port." },
+
+    EE: { label: "Estonia", publicDocs: [], notes: "" },
+
+    FI: { label: "Finland", publicDocs: [
+      { title: "SESKO – Recommendation SK 13‑1 (H1 customer interface) (PDF)", url: "https://sesko.fi/wp-content/uploads/2022/12/Recommendation-SK-13-1_H1_customer-interface_englanninkielinen_2022-12-13.pdf", tag: "HAN / H1" }
+    ], notes: "SESKO recommendation defines the local customer interface for electricity meters." },
+
+    FR: { label: "France", publicDocs: [
+      { title: "Enedis – Linky TIC (Télé‑Information Client) specification (PDF)", url: "https://www.enedis.fr/media/2035/download", tag: "Customer interface (TIC)" }
+    ], notes: "France commonly exposes customer-facing data via TIC for Linky meters." },
+
+    DE: { label: "Germany", publicDocs: [
+      { title: "BSI TR‑03109‑1 – Smart Meter Gateway (PDF)", url: "https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Publikationen/TechnischeRichtlinien/TR03109/TR03109-1.pdf?__blob=publicationFile&v=4", tag: "Security / architecture" }
+    ], notes: "Germany is SMGW-centric; interoperability is shaped by BSI TR‑03109 and related documents." },
+
+    GR: { label: "Greece", publicDocs: [], notes: "" },
+    HU: { label: "Hungary", publicDocs: [], notes: "" },
+
+    IE: { label: "Ireland", publicDocs: [
+      { title: "CRU (formerly CER) – Smart Meter HAN strategy document (PDF)", url: "https://cru.ie/wp-content/uploads/2012/10/CER12213g.pdf", tag: "Program document" }
+    ], notes: "Program artefacts exist; meter-family specifics are typically sourced from DSOs/vendors." },
+
+    IT: { label: "Italy", publicDocs: [], notes: "" },
+    LV: { label: "Latvia", publicDocs: [], notes: "" },
+    LT: { label: "Lithuania", publicDocs: [], notes: "" },
+
+    LU: { label: "Luxembourg", publicDocs: [
+      { title: "Luxmetering – E‑Meter P1 specification (PDF)", url: "https://www.luxmetering.lu/pdf/SPEC%20-%20E-Meter_P1_specification_20210308.pdf", tag: "HAN / P1" }
+    ], notes: "P1 spec aligns closely with DSMR-style interfaces." },
+
+    MT: { label: "Malta", publicDocs: [], notes: "" },
+
+    NL: { label: "Netherlands", publicDocs: [
+      { title: "DSMR 5.0.2 – P1 Companion Standard (PDF)", url: "https://www.netbeheernederland.nl/sites/default/files/2024-02/dsmr_5.0.2_p1_companion_standard.pdf", tag: "HAN / P1" }
+    ], notes: "DSMR is one of Europe’s best-known public companion specs for the customer interface (P1)." },
+
+    PL: { label: "Poland", publicDocs: [], notes: "" },
+    PT: { label: "Portugal", publicDocs: [], notes: "" },
+    RO: { label: "Romania", publicDocs: [], notes: "" },
+    SK: { label: "Slovakia", publicDocs: [], notes: "" },
+    SI: { label: "Slovenia", publicDocs: [], notes: "" },
+    ES: { label: "Spain", publicDocs: [], notes: "" },
+
+    SE: { label: "Sweden", publicDocs: [
+      { title: "Energiföretagen – Industry recommendation: local customer interface v1.3 (PDF)", url: "https://www.energiforetagen.se/globalassets/medlemsportalen-oppet/branschrekommendation-lokalt-granssnitt-v1_3.pdf", tag: "HAN guidance" }
+    ], notes: "Industry recommendation for a harmonized local customer interface." }
+  };
+
+  // Optional: add region-specific docs here (by NUTS id).
+  // Example structure:
+  // const SUBREGION_DATA = {
+  //   DE: {
+  //     "DE1": { docs: [{ title: "...", url: "...", tag: "..." }], notes: "..." }
+  //   }
+  // };
+  const SUBREGION_DATA = {};
+
+  const DEFAULT_NOTES = `
+No widely referenced public national DLMS/COSEM companion spec is included here.
+In practice, the “rest” is usually obtained via:
+• DSO procurement annexes / HES integration packs
+• Meter vendor COSEM object lists + option statements (PICS/PIXIT‑like)
+• DLMS UA Certified Devices / Qualification references
+• OMS specs for M‑Bus ecosystems (gas/water/heat)
+  `.trim();
+
+  // NUTS polygons + label points (EUROSTAT/GISCO) — use simplified 10M, EPSG:4326, NUTS 2024
+  // We load these lazily (only when the user selects a country and wants subdivisions).
+  const NUTS_RG_URL = (level) => `https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_10M_2024_4326_LEVL_${level}.geojson`;
+  const NUTS_LB_URL = (level) => `https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_LB_2024_4326_LEVL_${level}.geojson`;
+
+  // Countries layer source (world borders; we filter to EU‑27)
+  // Use official EU GISCO country boundaries (more reliable than GitHub raw in some sandboxed environments)
+  // Directory listing: https://gisco-services.ec.europa.eu/distribution/v2/countries/geojson/
+  const COUNTRIES_GEOJSON_URL = "https://gisco-services.ec.europa.eu/distribution/v2/countries/geojson/CNTR_RG_60M_2024_4326.geojson";
+
+  // -----------------------------
+  // UI helpers
+  // -----------------------------
+
+  const toastEl = document.getElementById("toast");
+  let toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.style.display = "block";
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => (toastEl.style.display = "none"), 2400);
+  }
+
+  function setStatusPill(kind, text) {
+    const pill = document.getElementById("statusPill");
+    pill.classList.remove("ok", "warn");
+    pill.classList.add(kind);
+    pill.textContent = text;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[c]));
+  }
+
+  function getProp(p, keys) {
+    for (const k of keys) {
+      if (p && p[k] !== undefined && p[k] !== null && p[k] !== "") return p[k];
+    }
+    return null;
+  }
+
+  // Open a link in a new tab if allowed; always provide a copy fallback.
+  async function openOrCopy(url) {
+    try {
+      const w = window.open(url, "_blank", "noopener");
+      if (w) return;
+    } catch (_) {}
+
+    try {
+      await navigator.clipboard.writeText(url);
+      toast("Link copied to clipboard");
+    } catch (_) {
+      // Final fallback: prompt
+      window.prompt("Copy this URL:", url);
+    }
+  }
+
+  // -----------------------------
+  // Map setup (modern basemap styles)
+  // -----------------------------
+
+  // Keep default Leaflet zoom control, but place it away from the sidebar.
+  const map = L.map("map", { worldCopyJump: true, zoomControl: true }).setView([54.7, 10.0], 4);
+
+  // Modern-looking OSM-derived basemaps (no API keys): CARTO + OSM
+  // Note: These are still OpenStreetMap-based tiles, just styled.
+  const basemapLight = L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    {
+      maxZoom: 20,
+      subdomains: "abcd",
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }
+  );
+
+  const basemapDark = L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    {
+      maxZoom: 20,
+      subdomains: "abcd",
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }
+  );
+
+  const basemapOSM = L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }
+  );
+
+  // Default to the modern light basemap
+  basemapLight.addTo(map);
+
+  // Basemap switcher (top-right)
+  L.control.layers(
+    {
+      "Modern (Light)": basemapLight,
+      "Modern (Dark)": basemapDark,
+      "Classic OSM": basemapOSM,
+    },
+    {},
+    { collapsed: true, position: "topright" }
+  ).addTo(map);
+
+  // Move zoom buttons to bottom-right to reduce UI clashes with the sidebar.
+  map.zoomControl.setPosition("bottomright");
+
+  // Debug helper: prove map clicks are being captured even if border layers fail to load.
+  map.on("click", (e) => {
+    // Only show a subtle toast; does not interfere with normal selection.
+    toast(`Map click: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`);
+  });
+
+  function safeFitBounds(layerOrBounds, opts) {
+    try {
+      const bounds = (typeof layerOrBounds?.getBounds === "function") ? layerOrBounds.getBounds() : layerOrBounds;
+      if (bounds && typeof bounds.isValid === "function" && bounds.isValid()) {
+        map.fitBounds(bounds, opts);
+        return true;
+      }
+    } catch (_) {}
+    map.setView([54.7, 10.0], 4);
+    return false;
+  }
+
+  // -----------------------------
+  // State
+  // -----------------------------
+
+  let selectedCountry = null;     // ISO2
+  let selectedSubregion = null;   // NUTS id
+
+  let countriesLayer = null;
+  let selectedCountryLayer = null;
+  const iso2ToLayer = new Map();
+
+  let nutsLayer = null;
+  let nutsLabels = { 1: null, 2: null, 3: null };   // FeatureCollections
+  let nutsPolys = { 1: null, 2: null, 3: null };    // FeatureCollections
+  let nutsNameById = { 1: new Map(), 2: new Map(), 3: new Map() };
+
+  // -----------------------------
+  // Rendering
+  // -----------------------------
+
+  function renderCountryDetails(iso2) {
+    const entry = COUNTRY_DATA[iso2];
+    const details = document.getElementById("details");
+    const title = document.getElementById("countryTitle");
+    const notes = document.getElementById("countryNotes");
+    const docs = document.getElementById("docs");
+
+    details.style.display = "block";
+
+    const name = entry?.label || iso2;
+    title.textContent = selectedSubregion ? `${name} (${iso2}) — ${selectedSubregion}` : `${name} (${iso2})`;
+
+    const chosenLevel = getSelectedLevel(iso2);
+    const levelLabel = document.getElementById("toggleSub")?.checked
+      ? `Subdivisions: NUTS ${chosenLevel} (click a region on the map)`
+      : "Subdivisions: off";
+
+    const topNotes = entry?.notes ? entry.notes : DEFAULT_NOTES;
+    notes.textContent = selectedSubregion ? topNotes : `${topNotes}  •  ${levelLabel}`;
+
+    const countryDocs = (entry?.publicDocs || []);
+
+    let regionDocs = [];
+    let regionNotes = "";
+    if (selectedSubregion && SUBREGION_DATA[iso2] && SUBREGION_DATA[iso2][selectedSubregion]) {
+      const r = SUBREGION_DATA[iso2][selectedSubregion];
+      regionDocs = r.docs || [];
+      regionNotes = r.notes || "";
+    }
+
+    function renderDocList(label, docList) {
+      if (!docList.length) return "";
+      const lis = docList.map(d => {
+        const tag = d.tag ? ` <span class=\"pill\" style=\"font-size:11px;\">${escapeHtml(d.tag)}</span>` : "";
+        const url = String(d.url);
+        return `
+          <li>
+            <div class=\"link-row\">
+              <div class=\"link-title\">
+                <strong>${escapeHtml(d.title)}</strong>${tag}
+              </div>
+              <div class=\"link-actions\">
+                <button class=\"btn\" type=\"button\" data-open-url=\"${escapeHtml(url)}\">Open</button>
+                <button class=\"btn\" type=\"button\" data-copy-url=\"${escapeHtml(url)}\">Copy</button>
+              </div>
+            </div>
+          </li>
+        `;
+      }).join("");
+      return `
+        <div class=\"small\" style=\"margin-top:10px;\">
+          <strong>${escapeHtml(label)}</strong>
+          <ul>${lis}</ul>
+        </div>
+      `;
+    }
+
+    const regionBlock = selectedSubregion
+      ? `
+        <div class=\"small\" style=\"margin-top:8px;\">
+          <strong>Region notes</strong>
+          <div class=\"muted\" style=\"margin-top:6px;\">${escapeHtml(regionNotes || "No region-specific notes yet. Add them in SUBREGION_DATA.")}</div>
+        </div>
+      `
+      : "";
+
+    docs.innerHTML = `
+      ${renderDocList("Published docs (country)", countryDocs)}
+      ${selectedSubregion ? renderDocList("Published docs (region)", regionDocs) : ""}
+      ${regionBlock}
+      <div class=\"small\" style=\"margin-top:10px;\">
+        <strong>Where to obtain the rest</strong>
+        <ul>
+          <li>DSO tender/procurement annexes and head-end integration packs</li>
+          <li>Vendor COSEM object lists and option statements (PICS/PIXIT-style)</li>
+          <li>DLMS UA certification entries (Certified Devices / Qualification)</li>
+        </ul>
+      </div>
+    `;
+
+    // Activate link buttons
+    docs.querySelectorAll("button[data-open-url]").forEach(btn => {
+      btn.addEventListener("click", () => openOrCopy(btn.getAttribute("data-open-url")));
+    });
+    docs.querySelectorAll("button[data-copy-url]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const url = btn.getAttribute("data-copy-url");
+        try {
+          await navigator.clipboard.writeText(url);
+          toast("Link copied to clipboard");
+        } catch (_) {
+          window.prompt("Copy this URL:", url);
+        }
+      });
+    });
+
+    // Ensure details are visible
+    details.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+
+  function styleCountryDefault() {
+    return { weight: 1, color: "#9ca3af", fillColor: "#e5e7eb", fillOpacity: 0.35 };
+  }
+
+  function styleCountrySelected() {
+    return { weight: 2, color: "#111827", fillColor: "#e5e7eb", fillOpacity: 0.55 };
+  }
+
+  function styleNutsDefault() {
+    return { weight: 1, color: "#6b7280", fillColor: "#d1d5db", fillOpacity: 0.18 };
+  }
+
+  function styleNutsSelected() {
+    return { weight: 2, color: "#111827", fillColor: "#d1d5db", fillOpacity: 0.32 };
+  }
+
+  function getSelectedLevel(iso2) {
+    const v = document.getElementById("subLevel")?.value || "auto";
+    if (v === "auto") return (COUNTRY_AUTO_LEVEL[iso2] || 2);
+    const n = Number(v);
+    return (n === 1 || n === 2 || n === 3) ? n : 2;
+  }
+
+  // -----------------------------
+  // Country selection + jump
+  // -----------------------------
+
+  function selectCountry(iso2, opts = { zoom: true }) {
+    if (!iso2 || !EU27.has(iso2)) return;
+
+    selectedCountry = iso2;
+    selectedSubregion = null;
+
+    // Visual highlight on countries
+    if (selectedCountryLayer) selectedCountryLayer.setStyle(styleCountryDefault());
+    selectedCountryLayer = iso2ToLayer.get(iso2) || null;
+    if (selectedCountryLayer) selectedCountryLayer.setStyle(styleCountrySelected());
+
+    setStatusPill("warn", `Selected: ${iso2}`);
+    renderCountryDetails(iso2);
+
+    if (opts.zoom && selectedCountryLayer) safeFitBounds(selectedCountryLayer, { padding: [20, 20] });
+
+    const showSub = !!document.getElementById("toggleSub")?.checked;
+    if (showSub) showSubregionsForCountry(iso2);
+    else clearSubregions();
+  }
+
+  function selectSubregion(iso2, nutsId) {
+    selectedCountry = iso2;
+    selectedSubregion = nutsId;
+
+    setStatusPill("ok", `Selected: ${nutsId}`);
+    renderCountryDetails(iso2);
+
+    // highlight region in nuts layer
+    if (!nutsLayer) return;
+    nutsLayer.eachLayer(l => {
+      const p = l.feature?.properties || {};
+      const id = String(getProp(p, ["nuts_id", "NUTS_ID", "id"]) || "");
+      l.setStyle(id === nutsId ? styleNutsSelected() : styleNutsDefault());
+    });
+  }
+
+  // -----------------------------
+  // Subregions (NUTS)
+  // -----------------------------
+
+  async function loadNutsLevel(level) {
+    if (nutsPolys[level] && nutsLabels[level]) return;
+
+    setStatusPill("warn", `Loading NUTS ${level}…`);
+
+    const [polyRes, labelRes] = await Promise.all([
+      fetch(NUTS_RG_URL(level)),
+      fetch(NUTS_LB_URL(level)),
+    ]);
+
+    if (!polyRes.ok) throw new Error(`NUTS polygons load failed: ${polyRes.status} ${polyRes.statusText}`);
+    if (!labelRes.ok) throw new Error(`NUTS labels load failed: ${labelRes.status} ${labelRes.statusText}`);
+
+    nutsPolys[level] = await polyRes.json();
+    nutsLabels[level] = await labelRes.json();
+
+    // Build name map (best-effort; property names vary)
+    const nameMap = new Map();
+    const labelFeatures = Array.isArray(nutsLabels[level]?.features) ? nutsLabels[level].features : [];
+
+    for (const f of labelFeatures) {
+      const p = f.properties || {};
+      const nutsId = String(getProp(p, ["nuts_id", "NUTS_ID", "id", "NUTS_ID_1"]) || "");
+      const name = String(getProp(p, ["name", "NAME", "name_latn", "NAME_LATN", "nuts_name", "NUTS_NAME", "LABEL"]) || "");
+      if (nutsId && name) nameMap.set(nutsId, name);
+    }
+
+    nutsNameById[level] = nameMap;
+  }
+
+  function clearSubregions() {
+    if (nutsLayer) {
+      map.removeLayer(nutsLayer);
+      nutsLayer = null;
+    }
+  }
+
+  async function showSubregionsForCountry(iso2) {
+    try {
+      const level = getSelectedLevel(iso2);
+      await loadNutsLevel(level);
+
+      clearSubregions();
+
+      const features = Array.isArray(nutsPolys[level]?.features) ? nutsPolys[level].features : [];
+
+      // Filter regions by country prefix (NUTS id starts with ISO2)
+      const filtered = features.filter(f => {
+        const p = f.properties || {};
+        const nutsId = String(getProp(p, ["nuts_id", "NUTS_ID", "id"]) || "");
+        return nutsId.startsWith(iso2);
+      });
+
+      if (!filtered.length) {
+        setStatusPill("warn", `No NUTS ${level} regions for ${iso2}`);
+        return;
+      }
+
+      const fc = { type: "FeatureCollection", features: filtered };
+
+      nutsLayer = L.geoJSON(fc, {
+        style: styleNutsDefault,
+        onEachFeature: (feature, layer) => {
+          const p = feature.properties || {};
+          const nutsId = String(getProp(p, ["nuts_id", "NUTS_ID", "id"]) || "");
+          const name = nutsNameById[level].get(nutsId) || "";
+
+          // Tooltip (hover)
+          const tt = name ? `${name} (${nutsId})` : nutsId;
+          layer.bindTooltip(tt, { sticky: true, direction: "auto" });
+
+          layer.on("click", () => {
+            // Zoom a bit to the subregion, then render details
+            safeFitBounds(layer, { padding: [30, 30] });
+            selectSubregion(iso2, nutsId);
+          });
+        }
+      }).addTo(map);
+
+      setStatusPill("warn", `Selected: ${iso2} (NUTS ${level} loaded)`);
+
+      // Keep country highlight + zoom if needed
+      if (selectedCountryLayer) selectedCountryLayer.setStyle(styleCountrySelected());
+    } catch (err) {
+      console.error(err);
+      setStatusPill("warn", "Subregions failed to load");
+      toast("Could not load NUTS subdivisions (network/CORS). Try downloading and hosting GeoJSON locally.");
+      clearSubregions();
+    }
+  }
+
+  // -----------------------------
+  // Countries loading
+  // -----------------------------
+
+  function buildJumpList() {
+    const listRoot = document.getElementById("countryList");
+    const allEntries = Array.from(EU27)
+      .map(iso2 => ({ iso2, name: (COUNTRY_DATA[iso2]?.label || iso2) }))
+      .sort((a,b) => a.name.localeCompare(b.name));
+
+    // “Tests” (non-fatal)
+    if (allEntries.length !== 27) console.warn("EU27 list length is not 27:", allEntries.length);
+
+    function renderList(filterText = "") {
+      const f = filterText.trim().toLowerCase();
+      const items = allEntries.filter(x => !f || x.name.toLowerCase().includes(f) || x.iso2.toLowerCase().includes(f));
+      listRoot.innerHTML = items.map(x => `
+        <button class="country-btn" data-iso="${x.iso2}" type="button">
+          ${escapeHtml(x.name)} <span class="muted">(${x.iso2})</span>
+        </button>
+      `).join("");
+    }
+
+    renderList();
+
+    // Clicking a country in the list should select and zoom
+    listRoot.addEventListener("click", (evt) => {
+      const btn = evt.target.closest("button[data-iso]");
+      if (!btn) return;
+      const iso2 = btn.getAttribute("data-iso");
+      selectCountry(iso2, { zoom: true });
+    });
+
+    document.getElementById("search").addEventListener("input", (e) => renderList(e.target.value));
+  }
+
+  function getIso2FromCountryProps(p) {
+    // GISCO countries (CNTR_*) typically includes CNTR_ID (ISO2) and sometimes ISO2_CODE.
+    const cntr = (p.CNTR_ID || p.ISO2_CODE || p.iso2 || p.ISO2 || "").toUpperCase();
+    if (cntr && cntr !== "-99") return cntr;
+
+    // Fallback for other datasets
+    const raw2 = (p.ISO_A2 || p.iso_a2 || "").toUpperCase();
+    if (raw2 && raw2 !== "-99") return raw2;
+
+    const raw3 = (p.ISO_A3 || p.iso_a3 || p.ADM0_A3 || p.CNTR_ID_3 || p.ISO3_CODE || "").toUpperCase();
+    const ISO3_TO_ISO2 = {
+      AUT:"AT", BEL:"BE", BGR:"BG", HRV:"HR", CYP:"CY", CZE:"CZ", DNK:"DK", EST:"EE", FIN:"FI",
+      FRA:"FR", DEU:"DE", GRC:"GR", HUN:"HU", IRL:"IE", ITA:"IT", LVA:"LV", LTU:"LT", LUX:"LU",
+      MLT:"MT", NLD:"NL", POL:"PL", PRT:"PT", ROU:"RO", SVK:"SK", SVN:"SI", ESP:"ES", SWE:"SE"
+    };
+    if (raw3 && ISO3_TO_ISO2[raw3]) return ISO3_TO_ISO2[raw3];
+
+    return "";
+  }
+
+  // Buttons / control handlers
+  document.getElementById("btnReset").addEventListener("click", () => {
+    selectedCountry = null;
+    selectedSubregion = null;
+    if (selectedCountryLayer) selectedCountryLayer.setStyle(styleCountryDefault());
+    selectedCountryLayer = null;
+    clearSubregions();
+    setStatusPill("warn", "Click a country");
+    map.setView([54.7, 10.0], 4);
+    document.getElementById("details").style.display = "none";
+  });
+
+  document.getElementById("toggleSub").addEventListener("change", () => {
+    if (!selectedCountry) return;
+    if (document.getElementById("toggleSub").checked) showSubregionsForCountry(selectedCountry);
+    else clearSubregions();
+    renderCountryDetails(selectedCountry);
+  });
+
+  document.getElementById("subLevel").addEventListener("change", () => {
+    if (!selectedCountry) return;
+    selectedSubregion = null;
+    if (document.getElementById("toggleSub").checked) showSubregionsForCountry(selectedCountry);
+    renderCountryDetails(selectedCountry);
+  });
+
+  // Build list immediately (works even if map data fails)
+  buildJumpList();
+
+  // Load and render EU‑27 countries
+  fetch(COUNTRIES_GEOJSON_URL)
+    .then(r => {
+      if (!r.ok) throw new Error(`Country GeoJSON fetch failed: ${r.status} ${r.statusText}`);
+      return r.json();
+    })
+    .then(geojson => {
+      const features = Array.isArray(geojson.features) ? geojson.features : [];
+
+      const euFeatures = features.filter(f => {
+        const p = f.properties || {};
+        const iso2 = getIso2FromCountryProps(p);
+        return EU27.has(iso2);
+      });
+
+      if (!euFeatures.length) {
+        setStatusPill("warn", "No EU features");
+        return;
+      }
+
+      countriesLayer = L.geoJSON({ type: "FeatureCollection", features: euFeatures }, {
+        style: styleCountryDefault,
+        onEachFeature: (feature, layer) => {
+          const p = feature.properties || {};
+          const iso2 = getIso2FromCountryProps(p);
+          const name = COUNTRY_DATA[iso2]?.label || p.ADMIN || p.name || iso2 || "Unknown";
+
+          if (iso2) iso2ToLayer.set(iso2, layer);
+
+          layer.bindTooltip(name, { sticky: true, direction: "auto" });
+
+          layer.on("click", () => {
+            selectCountry(iso2, { zoom: true });
+          });
+        }
+      }).addTo(map);
+
+      safeFitBounds(countriesLayer, { padding: [20, 20] });
+      setStatusPill("warn", "Click a country");
+    })
+    .catch(err => {
+      console.error(err);
+      setStatusPill("warn", "Countries failed to load");
+      toast("Could not load country borders (network/CORS). The jump list still works.");
+    });
+</script>
+</body>
+</html>
